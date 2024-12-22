@@ -5,6 +5,15 @@
  <img src="https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white"/>
 </div>
 
+
+https://github.com/user-attachments/assets/929bed01-7e81-4a77-8668-993b76827e09
+
+
+![屏幕截图 2024-12-22 172825](https://github.com/user-attachments/assets/54e0af4e-6159-46e4-91e5-6600354d5de4)
+
+![屏幕截图 2024-12-22 172840](https://github.com/user-attachments/assets/bf84022d-c23c-4ca2-a405-b1f17dd96f27)
+
+
 ## 🌟 Features
 
 - 🔍 Advanced job search with multiple filters
