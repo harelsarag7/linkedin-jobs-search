@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LinkedIn Jobs Search</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        /* 基础样式设置 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        /* 固定高度和滚动设置 */
+        .content-container {
+            height: calc(100vh - 2rem);
+            overflow: hidden;
+            background-color: #f8fafc;
+        }
+        
+        .scrollable-content {
+            height: 100%;
+            overflow-y: auto;
+            scrollbar-width: thin;
+        }
+        
+        /* 美化滚动条 */
+        .scrollable-content::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .scrollable-content::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 3px;
+        }
+        
+        .scrollable-content::-webkit-scrollbar-thumb {
+            background: #94a3b8;
+            border-radius: 3px;
+        }
+        
+        .scrollable-content::-webkit-scrollbar-thumb:hover {
+            background: #64748b;
+        }
+        
+        /* 输入框样式 */
+        .search-input {
+            transition: all 0.3s ease;
+            border: 1px solid #e2e8f0;
+            background-color: #f8fafc;
+        }
+        
+        .search-input:focus {
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+            background-color: white;
+        }
+        
+        /* 卡片悬浮效果 */
+        .job-card {
+            transition: all 0.3s ease;
+        }
+        
+        .job-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        }
+        
+        /* 按钮样式 */
+        .btn-primary {
+            background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+            transform: translateY(-1px);
+        }
+        
+        /* 禁用状态样式 */
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <!-- 主容器 -->
+    <div class="content-container flex gap-6 p-6">
+        <!-- 左侧结果展示区 -->
+        <div class="w-7/12 scrollable-content pr-6">
+            <div class="flex items-center justify-between mb-6">
+                <h1 class="text-3xl font-bold text-slate-800">LinkedIn Jobs Search</h1>
+                <div class="text-sm text-slate-500">Professional Job Search Tool</div>
+            </div>
+            
+            <!-- 搜索结果区域 -->
+            <div class="space-y-6">
+                <div id="searchParams" class="bg-white/50 backdrop-blur-sm p-6 rounded-xl border border-slate-200"></div>
+                <div id="results" class="space-y-4"></div>
+                
+                <!-- 分页控制器 -->
+                <div id="pagination" class="sticky bottom-6 bg-white/80 backdrop-blur-sm p-4 rounded-xl shadow-lg border border-slate-200">
+                    <div class="flex justify-between items-center">
+                        <button id="prevPage" class="btn-primary px-6 py-2 rounded-lg text-white font-medium">
+                            ← 上一页
+                        </button>
+                        <span id="pageInfo" class="text-slate-600 font-medium">
+                            第 <span id="currentPage" class="text-blue-600">1</span> 页
+                        </span>
+                        <button id="nextPage" class="btn-primary px-6 py-2 rounded-lg text-white font-medium">
+                            下一页 →
+                        </button>
+                    </div>
+                    <div id="searchStats" class="mt-3 text-slate-500 text-center text-sm"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 右侧搜索表单区 -->
+        <div class="w-5/12 scrollable-content">
+            <form id="searchForm" class="bg-white p-8 rounded-xl shadow-lg border border-slate-200 sticky top-0">
+                <div class="space-y-6">
+                    <!-- 基础搜索字段 -->
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">关键词</label>
+                        <input type="text" name="keyword" 
+                               class="search-input w-full p-3 rounded-lg" 
+                               placeholder="例如: Software Developer">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">地点 (例如: Los Angeles)</label>
+                        <input type="text" name="location" class="search-input w-full p-3 rounded-lg" 
+                               placeholder="输入城市名称">
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">发布时间范围</label>
+                        <input type="text" name="dateSincePosted" class="search-input w-full p-3 rounded-lg" 
+                               placeholder="past month, past week, 24hr"
+                               list="dateOptions">
+                        <datalist id="dateOptions">
+                            <option value="past month">
+                            <option value="past week">
+                            <option value="24hr">
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">工作类型</label>
+                        <input type="text" name="jobType" class="search-input w-full p-3 rounded-lg" 
+                               placeholder="full time, part time, contract, temporary, volunteer, internship"
+                               list="jobTypeOptions">
+                        <datalist id="jobTypeOptions">
+                            <option value="full time">
+                            <option value="part time">
+                            <option value="contract">
+                            <option value="temporary">
+                            <option value="volunteer">
+                            <option value="internship">
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">工作地点类型</label>
+                        <input type="text" name="remoteFilter" class="search-input w-full p-3 rounded-lg" 
+                               placeholder="on site, remote, hybrid"
+                               list="remoteOptions">
+                        <datalist id="remoteOptions">
+                            <option value="on site">
+                            <option value="remote">
+                            <option value="hybrid">
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">最低薪资要求</label>
+                        <input type="text" name="salary" class="search-input w-full p-3 rounded-lg" 
+                               placeholder="40000, 60000, 80000, 100000, 120000"
+                               list="salaryOptions">
+                        <datalist id="salaryOptions">
+                            <option value="40000">
+                            <option value="60000">
+                            <option value="80000">
+                            <option value="100000">
+                            <option value="120000">
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">经验水平</label>
+                        <input type="text" name="experienceLevel" class="search-input w-full p-3 rounded-lg" 
+                               placeholder="internship, entry level, associate, senior, director, executive"
+                               list="experienceOptions">
+                        <datalist id="experienceOptions">
+                            <option value="internship">
+                            <option value="entry level">
+                            <option value="associate">
+                            <option value="senior">
+                            <option value="director">
+                            <option value="executive">
+                        </datalist>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">排序方式</label>
+                        <select name="sortBy" class="search-input w-full p-3 rounded-lg">
+                            <option value="">默认排序</option>
+                            <option value="recent">最新发布</option>
+                            <option value="relevant">相关程度</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">结果数量限制</label>
+                        <select name="limit" class="search-input w-full p-3 rounded-lg">
+                            <option value="10">10</option>
+                            <option value="20">20</option>
+                            <option value="50">50</option>
+                            <option value="100">100</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-slate-700 font-medium mb-2">页码</label>
+                        <input type="text" name="page" class="search-input w-full p-3 rounded-lg" 
+                               placeholder="0, 1, 2..."
+                               value="0">
+                    </div>
+
+                    <div class="pt-6">
+                        <button type="submit" class="btn-primary w-full p-4 rounded-lg text-white font-medium text-lg">
+                            搜索职位
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript 代码保持不变 -->
+    <script>
+        let currentPage = 0;
+        const searchForm = document.getElementById('searchForm');
+        const prevPageBtn = document.getElementById('prevPage');
+        const nextPageBtn = document.getElementById('nextPage');
+        const currentPageSpan = document.getElementById('currentPage');
+        const searchStatsDiv = document.getElementById('searchStats');
+
+        // 更新分页控制状态
+        function updatePaginationControls(jobsCount, limit) {
+            prevPageBtn.disabled = currentPage === 0;
+            nextPageBtn.disabled = jobsCount < parseInt(limit);
+            currentPageSpan.textContent = currentPage + 1;
+            
+            // 更新搜索统计信息
+            searchStatsDiv.innerHTML = `
+                <p>当前显示: ${jobsCount} 个职位</p>
+                <p>每页显示: ${limit} 个结果</p>
+            `;
+        }
+
+        // 添加分页事件监听器
+        prevPageBtn.addEventListener('click', () => {
+            if (currentPage > 0) {
+                currentPage--;
+                document.querySelector('input[name="page"]').value = currentPage;
+                searchForm.dispatchEvent(new Event('submit'));
+            }
+        });
+
+        nextPageBtn.addEventListener('click', () => {
+            currentPage++;
+            document.querySelector('input[name="page"]').value = currentPage;
+            searchForm.dispatchEvent(new Event('submit'));
+        });
+
+        // 更新表单提交处理
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            // 清理空值
+            Object.keys(data).forEach(key => {
+                if (!data[key]) delete data[key];
+            });
+            
+            // 显示加载状态
+            document.getElementById('results').innerHTML = `
+                <div class="text-center p-4">
+                    <p class="text-gray-600">正在搜索...</p>
+                </div>
+            `;
+            
+            try {
+                const response = await fetch('/api/jobs/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(data)
+                });
+                
+                const result = await response.json();
+                
+                // 更新分页控制
+                updatePaginationControls(result.jobs.length, data.limit || '10');
+                
+                // 显示搜索参数
+                const searchParams = Object.entries(data)
+                    .map(([key, value]) => `<div><span class="font-semibold">${key}:</span> ${value}</div>`)
+                    .join('');
+                
+                document.getElementById('searchParams').innerHTML = `
+                    <h3 class="font-bold text-lg mb-2">搜索参数</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        ${searchParams}
+                    </div>
+                `;
+
+                // 显示结果
+                if (result.success && result.jobs.length > 0) {
+                    const jobsHtml = result.jobs.map(job => `
+                        <div class="job-card bg-white p-6 rounded-xl border border-slate-200">
+                            <div class="flex items-start justify-between">
+                                <div class="flex-grow">
+                                    <h2 class="text-xl font-bold text-slate-800 hover:text-blue-600 transition-colors">
+                                        ${job.position}
+                                    </h2>
+                                    <h3 class="text-lg text-slate-600 mt-1">${job.company}</h3>
+                                </div>
+                                ${job.companyLogo ? `
+                                    <img src="${job.companyLogo}" alt="${job.company} logo" 
+                                         class="w-16 h-16 object-contain rounded-lg bg-white p-2 border border-slate-200">
+                                ` : ''}
+                            </div>
+                            <div class="mt-4 space-y-2">
+                                <div class="flex items-center gap-2 text-slate-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                    <span>${job.location}</span>
+                                </div>
+                                <div class="flex items-center gap-2 text-slate-600">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                    <span>${job.agoTime}</span>
+                                </div>
+                                ${job.salary ? `
+                                    <div class="flex items-center gap-2 text-emerald-600 font-medium">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                                  d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                        </svg>
+                                        <span>${job.salary}</span>
+                                    </div>
+                                ` : ''}
+                                <div class="flex items-center gap-2 text-slate-500">
+                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+                                    </svg>
+                                    <span>发布日期: ${job.date}</span>
+                                </div>
+                            </div>
+                            <div class="mt-6">
+                                <a href="${job.jobUrl}" target="_blank" 
+                                   class="btn-primary inline-block px-6 py-3 rounded-lg text-white font-medium">
+                                    查看详情
+                                </a>
+                            </div>
+                        </div>
+                    `).join('');
+                    
+                    document.getElementById('results').innerHTML = `
+                        <h3 class="text-lg font-bold mb-4">找到 ${result.jobs.length} 个职位</h3>
+                        <div class="space-y-4">
+                            ${jobsHtml}
+                        </div>
+                    `;
+                } else {
+                    document.getElementById('results').innerHTML = `
+                        <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                            <p class="text-yellow-800">未找到匹配的职位。请尝试调整搜索条件。</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('results').innerHTML = `
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                        <p class="text-red-800">搜索请求失败，请稍后重试</p>
+                    </div>
+                `;
+            }
+        });
+    </script>
+</body>
+</html>
