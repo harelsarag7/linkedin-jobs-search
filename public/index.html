@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LinkedIn Jobs Search</title>
+    <link rel="icon" type="image/svg+xml" href="/linkedin-jobs-search.svg">
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
@@ -263,8 +264,15 @@
         <!-- 左侧结果展示区 -->
         <div class="w-full lg:w-7/12 scrollable-content pr-0 lg:pr-6">
             <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-6">
-                <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">LinkedIn Jobs Search</h1>
-                <div class="text-sm text-slate-500 mt-2 sm:mt-0">Professional Job Search Tool</div>
+                <div class="flex items-center gap-3">
+                    <img src="/linkedin-jobs-search.svg" 
+                         alt="LinkedIn Jobs Search Logo" 
+                         class="w-10 h-10 sm:w-12 sm:h-12 object-contain">
+                    <div>
+                        <h1 class="text-2xl sm:text-3xl font-bold text-slate-800">LinkedIn Jobs Search</h1>
+                        <div class="text-sm text-slate-500 mt-1">Professional Job Search Tool</div>
+                    </div>
+                </div>
             </div>
             
             <!-- 搜索结果区域 -->
