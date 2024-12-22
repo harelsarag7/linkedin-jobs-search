@@ -1,13 +1,22 @@
 require('dotenv').config();
 const express = require('express');
 const linkedIn = require('linkedin-jobs-api');
+const cors = require('cors');
 const app = express();
 
+// 更详细的 CORS 配置
+app.use(cors({
+    origin: process.env.NODE_ENV === 'development' 
+        ? 'http://localhost:3000' 
+        : ['your-production-domain.vercel.app'],
+    methods: ['GET', 'POST'],
+    credentials: true
+}));
 app.use(express.json());
 app.use(express.static('public'));
 
 // 基础欢迎路由
-app.get('/', (req, res) => {
+app.get('/api', (req, res) => {
     res.json({ message: 'LinkedIn Jobs API Demo Server is running!' });
 });
 
@@ -57,8 +66,14 @@ app.post('/api/jobs/search', async (req, res) => {
     }
 });
 
+// 修改服务器启动逻辑
 const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}`);
-    console.log(`Visit http://localhost:${PORT} to access the application`);
-});
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`✨ Server is running on http://localhost:${PORT}`);
+        console.log(`🚀 API endpoint: http://localhost:${PORT}/api`);
+        console.log(`📝 Search endpoint: http://localhost:${PORT}/api/jobs/search`);
+    });
+}
+
+module.exports = app;
