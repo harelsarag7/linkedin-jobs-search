@@ -61,7 +61,7 @@ app.post('/api/jobs/search', async (req, res) => {
         console.error('Search error:', error);
         res.status(500).json({
             success: false,
-            error: error.message || '搜索过程中发生错误'
+            error: error.message || 'An error occurred during the search'
         });
     }
 });

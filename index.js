@@ -17,20 +17,19 @@ async function searchJobs() {
         const jobs = await linkedIn.query(queryOptions);
         
         // 处理结果
-        console.log('找到的职位数量:', jobs.length);
+        console.log('Number of jobs found:', jobs.length);
         
         // 打印每个职位的基本信息
         jobs.forEach((job, index) => {
-            console.log(`\n--- 职位 ${index + 1} ---`);
-            console.log('职位名称:', job.position);
-            console.log('公司:', job.company);
-            console.log('地点:', job.location);
-            console.log('发布时间:', job.agoTime);
-            console.log('详情链接:', job.jobUrl);
-            console.log('------------------------');
+            console.log(`\n--- Job ${index + 1} ---`);
+            console.log('Position:', job.position);
+            console.log('Company:', job.company);
+            console.log('Location:', job.location);
+            console.log('Posted:', job.agoTime);
+            console.log('Details:', job.jobUrl);
         });
     } catch (error) {
-        console.error('搜索出错:', error);
+        console.error('Search error:', error);
     }
 }
 
