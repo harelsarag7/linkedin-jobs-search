@@ -41,7 +41,7 @@ Before running this application, make sure you have:
 
 1. Clone the repository:
 ```bash
-git clone https://github.com/yourusername/linkedin-jobs-search.git
+git clone https://github.com/ChanMeng666/linkedin-jobs-search.git
 cd linkedin-jobs-search
 ```
 
