@@ -615,6 +615,42 @@
                 searchFormContainer.classList.remove('expanded');
             }
         });
+
+        // 在 job card 的点击处理部分添加以下代码
+        function handleJobClick(jobUrl) {
+            const maxRetries = 3;
+            let retryCount = 0;
+
+            const tryAccess = async () => {
+                try {
+                    // 首先尝试直接访问
+                    window.open(jobUrl, '_blank');
+                } catch (error) {
+                    if (retryCount < maxRetries) {
+                        retryCount++;
+                        // 等待一段时间后重试
+                        await new Promise(resolve => setTimeout(resolve, 2000));
+                        tryAccess();
+                    } else {
+                        // 所有重试都失败后，显示友好的错误信息
+                        alert('无法访问 LinkedIn 页面。请稍后再试，或直接访问 LinkedIn 网站搜索该职位。');
+                    }
+                }
+            };
+
+            tryAccess();
+        }
+
+        // 修改职位卡片的点击事件
+        document.getElementById('results').innerHTML = `
+            // ... 其他代码 ...
+            <a href="javascript:void(0)" 
+               onclick="handleJobClick('${job.jobUrl}')" 
+               class="btn-primary inline-block px-6 py-3 rounded-lg text-white font-medium">
+                View Details
+            </a>
+            // ... 其他代码 ...
+        `;
     </script>
 
     <!-- 添加固定定位的 footer -->
