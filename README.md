@@ -189,3 +189,7 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 ## 📧 Contact
 
 For any questions or suggestions, please feel free to reach out or create an issue in the repository.
+
+## 🙋‍♀ Author
+
+Created and maintained by [Chan Meng](https://github.com/ChanMeng666).
