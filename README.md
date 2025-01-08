@@ -7,6 +7,12 @@
 
 LinkedIn Jobs Search - Enhanced is an open-source project that supercharges your job hunt with advanced search capabilities, a sleek user interface, and lightning-fast performance. Built with modern web technologies, it offers a streamlined, focused job search experience that puts you in control.
 
+<br/>
+
+[![Explore GitHub Profile README Generator](https://gradient-svg-generator.vercel.app/?text=👉+Try+It+Now!+👈&height=40&template=pride-rainbow)](https://linkedin-jobs-search.vercel.app/)
+
+<br/>
+
 https://github.com/user-attachments/assets/929bed01-7e81-4a77-8668-993b76827e09
 
 
