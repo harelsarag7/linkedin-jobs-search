@@ -9,15 +9,21 @@ import authRoutes from './routes/auth';
 import cookieParser from 'cookie-parser'
 
 require('dotenv').config();
+const isProd = process.env.NODE_ENV === 'production';
 
 const app = express();
 app.use(cookieParser())
 
-app.use(cors({
-  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : ['https://equal-try-app-d18992e2e6e0.herokuapp.com'],
-  methods: ['GET', 'POST', 'PUT', 'DELETE'],
-  credentials: true
-}));
+app.use(
+    cors({
+      origin: isProd
+        ? 'https://equal-try-app-d18992e2e6e0.herokuapp.com'
+        : 'http://localhost:8080', 
+      methods: ['GET','POST','PUT','DELETE'],
+      credentials: true, 
+    })
+  );
+  
 
 app.use(express.json());
 app.use(express.static('public'));

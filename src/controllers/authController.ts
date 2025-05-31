@@ -103,9 +103,11 @@ export const authController = {
   async deleteTokens(req: Request, res: Response, next: NextFunction) {
     res.clearCookie('applierToken', {
       httpOnly: process.env.NODE_ENV === 'development' ? false : true,
-      secure: process.env.NODE_ENV === 'production',
-      sameSite: 'lax',
+      secure: isProd,
+      sameSite: isProd ? 'none' : 'lax',
+      path: '/',
     })
+
     res.json({ success: true, message: 'Token deleted successfully' })
   }
 }
