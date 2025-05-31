@@ -12,6 +12,30 @@ if (!PASS_SALT) throw new Error('PASS_SALT is not set')
 
   const isProd = process.env.NODE_ENV !== 'development'
 
+  const getCookieConfig = () => {
+    const isProd = process.env.NODE_ENV === 'production'
+    
+    if (isProd) {
+      // Production: Use SameSite=None for cross-site
+      return {
+        httpOnly: true,
+        secure: true, // Required for SameSite=None
+        sameSite: 'none' as const,
+        maxAge: 14 * 24 * 60 * 60 * 1000,
+        path: '/',
+      }
+    } else {
+      // Development: Use Lax
+      return {
+        httpOnly: false, // Allow JS access in dev for debugging
+        secure: false,
+        sameSite: 'lax' as const,
+        maxAge: 14 * 24 * 60 * 60 * 1000,
+        path: '/',
+      }
+    }
+  }
+  
 export const authController = {
   async register(req: Request, res: Response, next: NextFunction) {
     try {
@@ -68,25 +92,14 @@ export const authController = {
   
       // Debug logging before setting cookie
       const isProd = process.env.NODE_ENV === 'production'
-      console.log('=== LOGIN DEBUG ===')
-      console.log('NODE_ENV:', process.env.NODE_ENV)
-      console.log('isProd:', isProd)
-      console.log('Setting cookie with config:', {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' : 'lax',
-        maxAge: 14 * 24 * 60 * 60 * 1000,
-        path: '/',
-      })
-  
-      const cookieConfig = {
-        httpOnly: true,
-        secure: isProd,
-        sameSite: isProd ? 'none' as const : 'lax' as const,
-        maxAge: 14 * 24 * 60 * 60 * 1000,
-        path: '/',
+      if (process.env.NODE_ENV === 'production') {
+        res.header('Access-Control-Allow-Credentials', 'true');
+        res.header('Vary', 'Origin');
       }
   
+      const cookieConfig = getCookieConfig()
+      console.log('Setting cookie with config:', cookieConfig)
+      
       res.cookie('applierToken', token, cookieConfig)
       console.log('Cookie set successfully')
   
