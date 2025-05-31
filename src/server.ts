@@ -9,16 +9,14 @@ import authRoutes from './routes/auth';
 import cookieParser from 'cookie-parser'
 
 require('dotenv').config();
-const isProd = process.env.NODE_ENV === 'production';
+// const isProd = process.env.NODE_ENV === 'production';
 
 const app = express();
 app.use(cookieParser())
 
 app.use(
     cors({
-      origin: isProd
-        ? 'https://equal-try-app-d18992e2e6e0.herokuapp.com'
-        : 'http://localhost:8080', 
+      origin: ['https://equal-try-app-d18992e2e6e0.herokuapp.com', 'http://localhost:8080'],
       methods: ['GET','POST','PUT','DELETE'],
       credentials: true, 
     })
