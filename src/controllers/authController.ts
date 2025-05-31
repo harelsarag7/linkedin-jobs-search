@@ -29,7 +29,7 @@ export const authController = {
 
       const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '14d' })
       res.cookie('applierToken', token, {
-        httpOnly: isProd ? true : false,
+        httpOnly: true,
         secure: isProd,
         sameSite: isProd ? 'none' : 'lax',
         maxAge: 14 * 24 * 60 * 60 * 1000,
