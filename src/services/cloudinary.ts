@@ -1,7 +1,7 @@
 import crypto from 'crypto'
 import { v2 as cloudinary } from 'cloudinary'
 import path from 'path'
-import { encrypt } from 'utils/hash'
+import { encrypt } from '../utils/hash'
 
 
 const CLOUD_NAME = process.env.CLOUDINARY_CLOUD_NAME
