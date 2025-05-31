@@ -1,4 +1,4 @@
-import { authenticateAndCheckUser } from 'middleware/authRequests';
+import { authenticateAndCheckUser } from '../middleware/authRequests';
 import { jobsController } from '../controllers/jobsController'
 
 import express, { RequestHandler } from 'express';

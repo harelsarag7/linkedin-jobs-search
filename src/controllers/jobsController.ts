@@ -2,9 +2,9 @@ const linkedIn = require('linkedin-jobs-api');
 import { Request, Response, NextFunction } from 'express';
 import { saveJobsForUser, updateJobStatusService } from '../services/db';
 import { fetchLinkedInJobs } from '../services/recentJobs';
-import { RequestWithUser } from 'types/request';
-import { Job } from 'models/Job';
-import { addJobNoteService, getJobNotes } from 'services/JobNote';
+import { RequestWithUser } from '../types/request';
+import { Job } from '../models/Job';
+import { addJobNoteService, getJobNotes } from '../services/JobNote';
 
 export const jobsController = {
     async recentJobs(req: Request, res: Response) {

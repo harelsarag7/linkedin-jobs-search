@@ -1,6 +1,6 @@
-import { UserType } from 'types/User'
+import { UserType } from '../types/User'
 import { User } from '../models/User'
-import { Job } from 'models/Job'
+import { Job } from '../models/Job'
 import { Types } from 'mongoose'
 
 

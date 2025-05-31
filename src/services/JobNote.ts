@@ -1,7 +1,7 @@
 // src/services/jobService.ts
 
 import { Types } from 'mongoose'
-import { Job } from 'models/Job' // adjust the path as needed
+import { Job } from '../models/Job' // adjust the path as needed
 
 /**
  * Return just the notes for a given jobId.

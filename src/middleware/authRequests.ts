@@ -1,8 +1,8 @@
 import dotenv from 'dotenv'
 import jwt, { JwtPayload } from 'jsonwebtoken'
 import { RequestHandler } from 'express'
-import { findUserByEmail } from 'services/user'
-import { RequestWithUser } from 'types/request'
+import { findUserByEmail } from '../services/user'
+import { RequestWithUser } from '../types/request'
 
 dotenv.config({ path: '.env' })
 const JWT_SECRET = process.env.JWT_SECRET!

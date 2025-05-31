@@ -1,4 +1,4 @@
-import { authenticateAndCheckUser } from "middleware/authRequests";
+import { authenticateAndCheckUser } from "../middleware/authRequests";
 import { usersController } from "../controllers/usersController";
 import express from 'express';
 import multer from 'multer';

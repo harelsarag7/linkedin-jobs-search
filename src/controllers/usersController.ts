@@ -1,10 +1,10 @@
-import { Request, Response, NextFunction } from 'express';
+import { Response, NextFunction } from 'express';
 import { getAppliedJobs, getReadyToApplyJobs } from '../services/db';
-import { RequestWithUser } from 'types/request';
-import { getUserStatsService, updateUserProfile } from 'services/user';
-import { uploadFileToCloudinary } from 'services/cloudinary';
+import { RequestWithUser } from '../types/request';
+import { getUserStatsService, updateUserProfile } from '../services/user';
+import { uploadFileToCloudinary } from '../services/cloudinary';
 import fs from 'fs/promises';
-import { JobType } from 'types/Jobs';
+import { JobType } from '../types/Jobs';
 
 export const usersController = {
     async getUserData(req: RequestWithUser, res: Response, next: NextFunction) {
