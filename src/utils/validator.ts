@@ -1,4 +1,4 @@
-const validateSearchParams = (params) => {
+const validateSearchParams = (params: any) => {
     const errors = [];
 
     if (params.salary && !['40000', '60000', '80000', '100000', '120000'].includes(params.salary)) {

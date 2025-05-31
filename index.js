@@ -2,12 +2,12 @@ const linkedIn = require('linkedin-jobs-api');
 
 // 创建搜索配置
 const queryOptions = {
-    keyword: 'software engineer',     // 搜索关键词
-    location: 'new zealand',             // 地点
-    dateSincePosted: 'past Week',    // 过去一周发布的职位
-    jobType: 'graduate',            // 全职
-    limit: '100',                     // 限制返回10条结果
-    page: "0"                        // 第一页
+    keyword: 'full stack developer',
+    location: 'Israel',
+    dateSincePosted: 'past Week',
+    jobType: 'graduate',
+    limit: '10',
+    page: "0"
 };
 
 // 定义主要函数
