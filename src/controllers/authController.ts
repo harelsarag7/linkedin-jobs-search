@@ -48,36 +48,48 @@ export const authController = {
       if (!email || !password) {
         return res.status(400).json({ success: false, message: 'Email and password required' })
       }
-
-      // lookup user
+  
       const user = await findUserByEmail(email)
       if (!user) {
         return res.status(401).json({ success: false, message: 'Invalid credentials' })
       }
-
-      // verify password
+  
       if(!user.password) {
         return res.status(401).json({ success: false, message: 'Invalid credentials' })
       }
       const customPassword = password + PASS_SALT
-
+  
       const match = await bcrypt.compare(customPassword, user.password)
       if (!match) {
         return res.status(401).json({ success: false, message: 'Invalid credentials' })
       }
-
-      // sign token
+  
       const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '14d' })
-
-      // set cookie
-      res.cookie('applierToken', token, {
+  
+      // Debug logging before setting cookie
+      const isProd = process.env.NODE_ENV === 'production'
+      console.log('=== LOGIN DEBUG ===')
+      console.log('NODE_ENV:', process.env.NODE_ENV)
+      console.log('isProd:', isProd)
+      console.log('Setting cookie with config:', {
         httpOnly: true,
         secure: isProd,
-        sameSite: isProd ? 'none' as const : 'lax' as const, // 'none' for cross-site in prod
+        sameSite: isProd ? 'none' : 'lax',
         maxAge: 14 * 24 * 60 * 60 * 1000,
         path: '/',
       })
-
+  
+      const cookieConfig = {
+        httpOnly: true,
+        secure: isProd,
+        sameSite: isProd ? 'none' as const : 'lax' as const,
+        maxAge: 14 * 24 * 60 * 60 * 1000,
+        path: '/',
+      }
+  
+      res.cookie('applierToken', token, cookieConfig)
+      console.log('Cookie set successfully')
+  
       res.json({ success: true, message: 'User logged in successfully', email })
     } catch (error) {
       console.error('Error during login:', error)
