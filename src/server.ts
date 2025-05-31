@@ -15,21 +15,38 @@ app.use(cookieParser())
 
 app.set('trust proxy', 1); // trust first proxy for Heroku
 
-// Add debug middleware to log all cookies
-app.use((req, res, next) => {
-  console.log(`${req.method} ${req.path}`);
-  console.log('Cookies received:', req.cookies);
-  console.log('Raw cookie header:', req.headers.cookie);
-  next();
-});
-
+// Enhanced CORS configuration for SameSite=None cookies
 app.use(
     cors({
       origin: ['https://equal-try-app-d18992e2e6e0.herokuapp.com', 'http://localhost:8080'],
-      methods: ['GET','POST','PUT','DELETE'],
-      credentials: true, 
+      methods: ['GET','POST','PUT','DELETE', 'OPTIONS'],
+      allowedHeaders: [
+        'Content-Type', 
+        'Authorization', 
+        'Cookie',
+        'Access-Control-Allow-Credentials',
+        'Access-Control-Allow-Origin'
+      ],
+      exposedHeaders: ['Set-Cookie'],
+      credentials: true,
+      preflightContinue: false,
+      optionsSuccessStatus: 204
     })
 );
+
+// Additional middleware for SameSite=None support
+app.use((req, res, next) => {
+  // Set additional headers for cross-site cookies
+  res.header('Access-Control-Allow-Credentials', 'true');
+  res.header('Access-Control-Allow-Origin', req.headers.origin);
+  
+  // Log cookies for debugging
+  console.log(`${req.method} ${req.path}`);
+  console.log('Cookies received:', req.cookies);
+  console.log('Raw cookie header:', req.headers.cookie);
+  
+  next();
+});
 
 app.use(express.json());
 app.use(express.static('public'));
