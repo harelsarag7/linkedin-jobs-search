@@ -71,7 +71,7 @@ export const authController = {
 
       // set cookie
       res.cookie('applierToken', token, {
-        httpOnly: isProd ? true : false,
+        httpOnly: true,
         secure: isProd,
         sameSite: isProd ? 'none' : 'lax',
         maxAge: 14 * 24 * 60 * 60 * 1000,
