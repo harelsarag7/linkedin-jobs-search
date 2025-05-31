@@ -14,6 +14,8 @@ require('dotenv').config();
 const app = express();
 app.use(cookieParser())
 
+app.set('trust proxy', 1); // trust first proxy for Heroku
+
 app.use(
     cors({
       origin: ['https://equal-try-app-d18992e2e6e0.herokuapp.com', 'http://localhost:8080'],
