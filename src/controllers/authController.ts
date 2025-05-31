@@ -10,6 +10,7 @@ const PASS_SALT = process.env.PASS_SALT
 if (!JWT_SECRET) throw new Error('JWT_SECRET is not set')
 if (!PASS_SALT) throw new Error('PASS_SALT is not set')
 
+  const isProd = process.env.NODE_ENV !== 'development'
 
 export const authController = {
   async register(req: Request, res: Response, next: NextFunction) {
@@ -28,10 +29,11 @@ export const authController = {
 
       const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '14d' })
       res.cookie('applierToken', token, {
-        httpOnly: process.env.NODE_ENV === 'development' ? false : true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        httpOnly: isProd ? true : false,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
         maxAge: 14 * 24 * 60 * 60 * 1000,
+        path: '/',
       })
 
       res.json({ success: true, message: 'User registered', email })
@@ -69,10 +71,11 @@ export const authController = {
 
       // set cookie
       res.cookie('applierToken', token, {
-        httpOnly: process.env.NODE_ENV === 'development' ? false : true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
+        httpOnly: isProd ? true : false,
+        secure: isProd,
+        sameSite: isProd ? 'none' : 'lax',
         maxAge: 14 * 24 * 60 * 60 * 1000,
+        path: '/',
       })
 
       res.json({ success: true, message: 'User logged in successfully', email })
