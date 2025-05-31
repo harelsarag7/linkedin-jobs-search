@@ -14,7 +14,7 @@ const app = express();
 app.use(cookieParser())
 
 app.use(cors({
-  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : ['your-production-domain.vercel.app'],
+  origin: process.env.NODE_ENV === 'development' ? 'http://localhost:8080' : ['https://equal-try-app-d18992e2e6e0.herokuapp.com'],
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   credentials: true
 }));
