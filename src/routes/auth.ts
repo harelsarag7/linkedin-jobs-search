@@ -1,4 +1,4 @@
-import { authController } from "controllers/authController";
+import { authController } from "../controllers/authController";
 import express, { RequestHandler } from 'express';
 
 const router = express.Router();
