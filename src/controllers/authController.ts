@@ -13,17 +13,16 @@ if (!PASS_SALT) throw new Error('PASS_SALT is not set')
   const isProd = process.env.NODE_ENV !== 'development'
 
   const getCookieConfig = () => {
-    const isProd = process.env.NODE_ENV === 'production'
+    const isProd = process.env.NODE_ENV !== 'development'
     
     if (isProd) {
       // Production: Use SameSite=None for cross-site
       return {
         httpOnly: true,
         secure: true, // Required for SameSite=None
-        sameSite: true,
+        sameSite: 'none' as const,
         maxAge: 14 * 24 * 60 * 60 * 1000,
         path: '/',
-        domain: '.herokuapp.com',  // Notice the leading dot
       }
     } else {
       // Development: Use Lax
@@ -61,7 +60,7 @@ export const authController = {
         path: '/',
       })
 
-      res.json({ success: true, message: 'User registered', email })
+      res.json({ success: true, message: 'User registered', email, token })
     } catch (err) {
       next(err)
     }
@@ -91,20 +90,12 @@ export const authController = {
   
       const token = jwt.sign({ email }, JWT_SECRET, { expiresIn: '14d' })
   
-      // Debug logging before setting cookie
-      const isProd = process.env.NODE_ENV === 'production'
-      if (process.env.NODE_ENV === 'production') {
-        res.header('Access-Control-Allow-Credentials', 'true');
-        res.header('Vary', 'Origin');
-      }
-  
       const cookieConfig = getCookieConfig()
-      console.log('Setting cookie with config:', cookieConfig)
       
       res.cookie('applierToken', token, cookieConfig)
       console.log('Cookie set successfully')
   
-      res.json({ success: true, message: 'User logged in successfully', email })
+      res.json({ success: true, message: 'User logged in successfully', email, token })
     } catch (error) {
       console.error('Error during login:', error)
       next(error)
@@ -112,10 +103,13 @@ export const authController = {
   },
 
   async verify(req: Request, res: Response, next: NextFunction) {
-    const token = req.cookies.applierToken
+    let token = req.cookies.applierToken
     if (!token) {
-      res.json({ valid: false })
-      return 
+      token = req.headers.authorization;
+      if(!token){
+        res.json({ valid: false })
+        return 
+      }
     }
   
     try {

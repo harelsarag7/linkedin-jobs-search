@@ -13,10 +13,13 @@ export const authenticateAndCheckUser: RequestHandler = async (
   res,
   next
 ) => {
-  const token = (req as RequestWithUser).cookies?.applierToken
+  let token = (req as RequestWithUser).cookies?.applierToken
   if (!token) {
-    res.status(401).json({ isAuthenticated: false, message: 'No token provided' })
-    return
+    token = req.headers.authorization;
+    if(!token) {
+        res.status(401).json({ isAuthenticated: false, message: 'No token provided' })
+        return
+    }
   }
 
   try {
