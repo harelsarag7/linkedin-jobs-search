@@ -23,6 +23,7 @@ if (!PASS_SALT) throw new Error('PASS_SALT is not set')
         sameSite: true,
         maxAge: 14 * 24 * 60 * 60 * 1000,
         path: '/',
+        domain: '.herokuapp.com',  // Notice the leading dot
       }
     } else {
       // Development: Use Lax
