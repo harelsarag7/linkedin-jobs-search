@@ -20,7 +20,7 @@ if (!PASS_SALT) throw new Error('PASS_SALT is not set')
       return {
         httpOnly: true,
         secure: true, // Required for SameSite=None
-        sameSite: 'none' as const,
+        sameSite: true,
         maxAge: 14 * 24 * 60 * 60 * 1000,
         path: '/',
       }
