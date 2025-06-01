@@ -36,7 +36,7 @@ export const usersController = {
             fullName, phone, email, location, bio,
             linkedinUrl, githubUrl, personalWebsite, desiredJobTitle,
             employmentType, minSalary, maxSalary, searchRadius,
-            openToRemote, skills, blockedCompanies
+            openToRemote, skills, blockedCompanies, keywords
           } = req.body;
     
           const updates: Partial<typeof user> = {
@@ -56,6 +56,7 @@ export const usersController = {
             ...(openToRemote !== undefined && { openToRemote }),
             ...(skills && { skills }),
             ...(blockedCompanies && { blockedCompanies }),
+            ...(keywords && { keywords }),
           };
     
           if (req.file) {

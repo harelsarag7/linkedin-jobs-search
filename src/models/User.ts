@@ -1,7 +1,7 @@
 import mongoose from 'mongoose'
 
 const userSchema = new mongoose.Schema({
-  fullName: { type: String, required: true },
+  fullName: { type: String, required: false },
   phone: { type: String, required: false },
   email: { type: String, required: true, unique: true },
   password: { type: String, required: false },
@@ -19,6 +19,7 @@ const userSchema = new mongoose.Schema({
   skills: { type: [String], required: false, default: [] },
   blockedCompanies: { type: [String], required: false, default: [] },
   resumeUrl: { type: String, required: false },
+  keywords: { type: [String], required: false, default: [] },
 
   UserAgent: { type: String, required: false },
   li_at: { type: String, required: false },  // LinkedIn cookie

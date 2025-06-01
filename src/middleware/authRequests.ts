@@ -13,7 +13,8 @@ export const authenticateAndCheckUser: RequestHandler = async (
   res,
   next
 ) => {
-  let token = (req as RequestWithUser).cookies?.applierToken
+//   let token = (req as RequestWithUser).cookies?.applierToken
+  let token = null;
   if (!token) {
     token = req.headers.authorization;
     if(!token) {

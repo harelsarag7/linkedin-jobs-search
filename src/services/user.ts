@@ -79,6 +79,7 @@ export async function updateUserProfile(
         UserAgent: result.UserAgent ?? undefined,
         li_at: result.li_at ?? undefined,
         resumeUrl: result.resumeUrl ?? undefined,
+        keywords: result.keywords ?? [],
       }
   
       return cleaned

@@ -21,4 +21,5 @@ export interface UserType {
     createdAt?: Date
     password?: string;
     resumeUrl?: string;
+    keywords?: string[]; // Keywords for job search
 }
