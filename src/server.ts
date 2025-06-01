@@ -19,18 +19,7 @@ app.set('trust proxy', 1); // trust first proxy for Heroku
 app.use(
     cors({
       origin: ['https://equal-try-app-d18992e2e6e0.herokuapp.com', 'http://localhost:8080'],
-      methods: ['GET','POST','PUT','DELETE', 'OPTIONS'],
-      allowedHeaders: [
-        'Content-Type', 
-        'Authorization', 
-        'Cookie',
-        'Access-Control-Allow-Credentials',
-        'Access-Control-Allow-Origin'
-      ],
-      exposedHeaders: ['Set-Cookie'],
       credentials: true,
-      preflightContinue: false,
-      optionsSuccessStatus: 204
     })
 );
 
