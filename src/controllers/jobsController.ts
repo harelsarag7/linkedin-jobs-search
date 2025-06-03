@@ -12,9 +12,13 @@ export const jobsController = {
       try {
         const keyword = req.query.keyword as string || '';
         const location = req.query.location as string || '';
-        const email = req.query.email as string || '';
         
         const cookie = req.user.li_at
+        const email = req.user.email
+        if (!email) {
+            throw new Error('Email is required to fetch recent jobs');  
+        }
+
         if(!cookie) {
           throw new Error('Missing li_at cookie in environment variables');
         }
