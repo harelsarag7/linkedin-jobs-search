@@ -6,3 +6,10 @@ export const getLiAtCookie = (cookieHeader: string): string | null => {
     return liAt ? liAt.split('=')[1] : null;
 };
   
+
+export function extractJobId(url: string): string | null {
+    const match = url.match(/\/view\/[^/]+-(\d+)/);
+    return match ? match[1] : null;
+  }
+  
+  

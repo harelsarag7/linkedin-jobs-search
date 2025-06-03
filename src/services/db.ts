@@ -1,3 +1,4 @@
+import { extractJobId } from '../utils/utils';
 import { Job } from '../models/Job';
 import { User } from '../models/User';
 export const saveJobsForUser = async (email: string, jobs: any[]) => {
@@ -10,12 +11,20 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
         return;
       }
   
+
       for (const job of jobs) {
-        const exists = await Job.findOne({ email, url: job.url });
+        const jobId = extractJobId(job.url);
+        if (!jobId) {
+          console.warn(`⚠️ Could not extract jobId from: ${job.url}`);
+          continue;
+        }
+      
+        const exists = await Job.findOne({ email, jobId });
         if (!exists) {
           await Job.create({
             ...job,
             email,
+            jobId,
             status: 'ready_to_apply',
             user_id: user._id,
           });
