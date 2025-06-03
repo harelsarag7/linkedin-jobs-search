@@ -6,7 +6,7 @@ import { uploadFileToCloudinary } from '../services/cloudinary';
 import fs from 'fs/promises';
 import { JobType } from '../types/Jobs';
 import puppeteer from 'puppeteer';
-import { extractKeywordsFromResumeUrl } from 'services/openai';
+import { extractKeywordsFromResumeUrl } from '../services/openai';
 
 const isDev = process.env.NODE_ENV === "development";
 
