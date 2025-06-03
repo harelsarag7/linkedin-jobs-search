@@ -5,7 +5,7 @@ import express, { RequestHandler } from 'express';
 
 const router = express.Router();
 
-router.get('/recent', jobsController.recentJobs);
+router.get('/recent', authenticateAndCheckUser, jobsController.recentJobs);
 
 router.put('/status/:id', authenticateAndCheckUser, jobsController.updateJobStatus as RequestHandler);
 router.get('/notes/:id', authenticateAndCheckUser, jobsController.getJobNotes as RequestHandler);

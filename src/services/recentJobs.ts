@@ -14,13 +14,14 @@ export const fetchLinkedInJobs = async (cookie: string, keyword: string, locatio
       'Cookie': `li_at=${cookie}`
     },
     maxRedirects: 0,
-    validateStatus: function (status) {
-        return status === 200;
-    },
-    timeout: 10000,
+    // validateStatus: function (status) {
+    //     return status === 200;
+    // },
+    // timeout: 10000,
   });
   const jobs = parseJobList(res.data);
 
+  
 //   const $ = cheerio.load(res.data);
 //   const now = new Date();
 //   const jobs: any[] = [];
