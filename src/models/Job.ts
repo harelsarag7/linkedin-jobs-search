@@ -7,6 +7,7 @@ const jobSchema = new mongoose.Schema({
   company: String,
   location: String,
   timeText: String,
+  jobId: String,
   url: { type: String, required: true },
   companyLogo: { type: String, required: false },
   agoTime: { type: String, required: false },
