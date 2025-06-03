@@ -5,7 +5,7 @@ import { fetchLinkedInJobs } from '../services/recentJobs';
 import { RequestWithUser } from '../types/request';
 import { Job } from '../models/Job';
 import { addJobNoteService, getJobNotes } from '../services/JobNote';
-import { getLiAtCookie } from 'utils/utils';
+import { getLiAtCookie } from '../utils/utils';
 
 export const jobsController = {
     async recentJobs(req: Request, res: Response) {
