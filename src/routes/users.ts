@@ -14,5 +14,5 @@ router.get('/readyToApply', authenticateAndCheckUser, usersController.readyToApp
 router.get('/appliedJobs', authenticateAndCheckUser, usersController.appliedJobs);
 router.get('/stats', authenticateAndCheckUser, usersController.getUserStats as express.RequestHandler);
 router.get('/recentActivity', authenticateAndCheckUser, usersController.getRecentActivity as express.RequestHandler);
-
+router.post('/connectLinkedin', authenticateAndCheckUser, usersController.connectLinkedIn as express.RequestHandler);
 export default router;

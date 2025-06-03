@@ -68,7 +68,10 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
         appliedAt: job.appliedAt ? job.appliedAt.toISOString() : null,
         savedAt: job.savedAt ? job.savedAt.toISOString() : null,
         user_id: job.user_id.toString(),
-        email: job.email
+        email: job.email,
+        companyLogo: job.companyLogo,
+        agoTime: job.agoTime,
+        salary: job.salary
       }))
     } catch (err) {
       console.error('❌ Error fetching ready-to-apply jobs:', err)
@@ -112,7 +115,10 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
         appliedAt: job.appliedAt ? job.appliedAt.toISOString() : null,
         savedAt: job.savedAt ? job.savedAt.toISOString() : null,
         user_id: job.user_id.toString(),
-        email: job.email
+        email: job.email,
+        companyLogo: job.companyLogo,
+        agoTime: job.agoTime,
+        salary: job.salary
       }))
     } catch (err) {
       console.error('❌ Error fetching applied jobs:', err)
@@ -144,3 +150,21 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
       return null
     }
   }
+
+  export async function getAllUsers(): Promise<any[]> {
+    try {
+      // Include li_at, keywords, and location in the projection
+      const users = await User.find({}, 'email li_at keywords location').exec();
+      return users.map(user => ({
+        id: user._id.toString(),
+        email: user.email,
+        li_at: user.li_at,
+        keywords: user.keywords || [],
+        location: user.location || '',
+      }));
+    } catch (err) {
+      console.error('❌ Error fetching all users:', err);
+      return [];
+    }
+  }
+  

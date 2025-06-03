@@ -1,10 +1,14 @@
 import { Response, NextFunction } from 'express';
 import { getAppliedJobs, getReadyToApplyJobs } from '../services/db';
 import { RequestWithUser } from '../types/request';
-import { getUserStatsService, updateUserProfile } from '../services/user';
+import { getUserStatsService, saveLiAtForUser, updateUserProfile } from '../services/user';
 import { uploadFileToCloudinary } from '../services/cloudinary';
 import fs from 'fs/promises';
 import { JobType } from '../types/Jobs';
+import puppeteer from 'puppeteer';
+import { extractKeywordsFromResumeUrl } from 'services/openai';
+
+const isDev = process.env.NODE_ENV === "development";
 
 export const usersController = {
     async getUserData(req: RequestWithUser, res: Response, next: NextFunction) {
@@ -62,6 +66,11 @@ export const usersController = {
           if (req.file) {
             const url = await uploadFileToCloudinary(user.id, req.file.path, req.file.originalname);
             updates.resumeUrl = url;
+            // 2. Extract top 5 keywords via OpenAI
+            const topKeywords = await extractKeywordsFromResumeUrl(url);
+            const existing = Array.isArray(user.keywords) ? user.keywords : [];
+            updates.keywords = Array.from(new Set([...existing, ...topKeywords]));
+            
             await fs.unlink(req.file.path);
           }
     
@@ -162,6 +171,94 @@ export const usersController = {
             console.error('Error fetching recent activity:', error);
             next(error);
         }
-    }
+    },
 
-};
+    async connectLinkedIn(
+        req: RequestWithUser,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> {
+        const ourUser = req.user
+        // const userAgent = req.headers['user-agent'] || ''
+        const userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36';
+        if (!ourUser) {
+          res.status(401).json({ success: false, message: 'Not authenticated.' })
+          return
+        }
+    
+        const linkedInEmail = req.body.email as string
+        const linkedInPassword = req.body.password as string
+        if (!linkedInEmail || !linkedInPassword) {
+          res
+            .status(400)
+            .json({ success: false, message: 'LinkedIn email + password are required' })
+          return
+        }
+    
+        let browser: any = null
+        try {
+          // 2) Launch Puppeteer
+          browser = await puppeteer.launch({
+            // headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+
+            headless: isDev ? false: true, // 🔥 Make sure browser is visible
+            slowMo: 200,      // 🔍 Slow actions down so you can watch
+            defaultViewport: null,
+            devtools: true, // 🔧 Open DevTools for debugging
+            // args: ['--start-maximized'], // optional: open full window
+            // executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // macOS Chrome path
+          })
+          const page = await browser.newPage()
+          
+          await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
+          await page.setUserAgent(
+            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
+          );
+
+          // 3) Go to LinkedIn login page
+          await page.goto('https://www.linkedin.com/login', {
+            waitUntil: 'domcontentloaded',
+            timeout: 30000,
+          })
+    
+          // 4) Fill email + password
+          await page.type('input#username', linkedInEmail, { delay: 50 })
+          await page.type('input#password', linkedInPassword, { delay: 50 })
+    
+          // 5) Click “Sign in”
+          await page.click('button[aria-label="Sign in"]')
+    
+          const client = await page.target().createCDPSession()
+          const allCookies = (await client.send('Network.getAllCookies')).cookies
+          const liAtCookie = allCookies.find((c: any) => c.name === 'li_at')?.value
+          
+          await browser.close()
+          browser = null
+    
+          // 8) Find the li_at cookie
+          if (!liAtCookie) {
+            res
+              .status(500)
+              .json({ success: false, message: 'Could not extract li_at from LinkedIn' })
+            return
+          }
+    
+          // 9) Persist that li_at value for our user
+          await saveLiAtForUser(ourUser.id, liAtCookie)
+    
+          // 10) Return success to frontend
+          res.json({ success: true, message: 'LinkedIn account linked successfully.' })
+          return
+        } catch (err: any) {
+          console.error('Error in connectLinkedIn:', err)
+          if (browser) {
+            try {
+              await browser.close()
+            } catch {} // ignore
+          }
+          res.status(500).json({ success: false, message: 'Unexpected error. Please try again.' })
+          return
+        }
+      },
+    }

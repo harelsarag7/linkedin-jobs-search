@@ -17,4 +17,7 @@ notes?: Array<{
     content: string; // Note content
     createdAt: string; // ISO date string
 }>;
+companyLogo?: string;
+agoTime?: string;
+salary?: string;
 }

@@ -1,8 +1,9 @@
 import puppeteer from "puppeteer";
 
+const isDev = process.env.NODE_ENV === "development";
 export const getJobDescription = async (url: string): Promise<string> => {
     const browser = await puppeteer.launch({
-      headless: false,
+      headless: isDev ? false: true,
       slowMo: 200,
       defaultViewport: null,
       devtools: true,
@@ -13,7 +14,7 @@ export const getJobDescription = async (url: string): Promise<string> => {
   
     await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
     await page.setUserAgent(
-      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/136.0.0.0 Safari/537.36'
+      'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
     );
   
     try {

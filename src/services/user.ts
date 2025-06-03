@@ -89,6 +89,13 @@ export async function updateUserProfile(
     }
   }
 
+export async function saveLiAtForUser(
+    userId: string,
+    liAtValue: string
+  ): Promise<void> {
+    // Example with Mongoose:
+    await User.findByIdAndUpdate(userId, { li_at: liAtValue })
+  }
 
   export async function getUserStatsService(
     user_id: string
