@@ -7,7 +7,7 @@ import jobsRoutes from './routes/jobs';
 import usersRoutes from './routes/users';
 import authRoutes from './routes/auth';
 import cookieParser from 'cookie-parser'
-import { startLinkedInJobCron } from 'services/cronjob';
+import { startLinkedInJobCron } from './services/cronjob';
 
 require('dotenv').config();
 
