@@ -8,7 +8,6 @@ export const getJobDescription = async (url: string): Promise<string> => {
       defaultViewport: null,
       devtools: true,
       args: ['--start-maximized'],
-      executablePath: '/app/.apt/usr/bin/google-chrome', // path injected by Heroku buildpack
     });
     const page = await browser.newPage();
   

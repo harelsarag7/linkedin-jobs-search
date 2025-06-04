@@ -220,7 +220,6 @@ export const usersController = {
             defaultViewport: null,
             devtools: true, // 🔧 Open DevTools for debugging
             // args: ['--start-maximized'], // optional: open full window
-            executablePath: '/app/.apt/usr/bin/google-chrome', // path injected by Heroku buildpack
           })
           const page = await browser.newPage()
           
