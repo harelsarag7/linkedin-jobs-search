@@ -306,7 +306,7 @@ export const usersController = {
                 console.log('🐧 Using executable path:', executablePath);
                 
                 browser = await puppeteer.launch({
-                  executablePath: executablePath,
+                  executablePath: '/app/.chrome-for-testing/chrome-linux64/chrome',
                   headless: !isDev,
                   args: [
                     '--no-sandbox',
