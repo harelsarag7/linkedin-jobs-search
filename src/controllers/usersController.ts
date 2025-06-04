@@ -3,51 +3,13 @@ import { getAppliedJobs, getReadyToApplyJobs } from '../services/db';
 import { RequestWithUser } from '../types/request';
 import { getUserStatsService, saveLiAtForUser, updateUserProfile } from '../services/user';
 import { uploadFileToCloudinary } from '../services/cloudinary';
-// import fs from 'fs/promises';
+import fs from 'fs/promises';
 import { JobType } from '../types/Jobs';
-import puppeteer from 'puppeteer-core';
-
+const puppeteer = require('puppeteer-core');
 import { extractKeywordsFromResumeUrl } from '../services/openai';
 
 const isDev = process.env.NODE_ENV === "development";
-console.log('🐧 Environment check:');
-console.log('CHROME_PATH:', process.env.CHROME_PATH);
 
-// Check if the file exists and what's in the directory
-const fs = require('fs');
-const path = require('path');
-
-try {
-  console.log('🔍 Checking /app/.chromium/bin/chrome exists:', fs.existsSync('/app/.chromium/bin/chrome'));
-  console.log('🔍 Checking /app/.chromium exists:', fs.existsSync('/app/.chromium'));
-  
-  if (fs.existsSync('/app/.chromium')) {
-    console.log('🔍 Contents of /app/.chromium:', fs.readdirSync('/app/.chromium'));
-  }
-  
-  if (fs.existsSync('/app/.chromium/bin')) {
-    console.log('🔍 Contents of /app/.chromium/bin:', fs.readdirSync('/app/.chromium/bin'));
-  }
-  
-  // Check other common Chrome locations
-  const commonPaths = [
-    '/usr/bin/google-chrome',
-    '/usr/bin/google-chrome-stable',
-    '/usr/bin/chromium',
-    '/usr/bin/chromium-browser',
-    '/opt/google/chrome/chrome',
-    '/app/.chrome-for-testing/chrome-linux64/chrome'
-  ];
-  
-  commonPaths.forEach(p => {
-    if (fs.existsSync(p)) {
-      console.log('✅ Found Chrome at:', p);
-    }
-  });
-  
-} catch (error: any) {
-  console.log('🚨 Error checking paths:', error?.message);
-}
 export const usersController = {
     async getUserData(req: RequestWithUser, res: Response, next: NextFunction) {
         try {
@@ -293,47 +255,25 @@ export const usersController = {
                 // defaultViewport: null,
                 // devtools: isDev
                 // });
-
-                console.log('🐧 Environment check:');
-                console.log('CHROME_PATH:', process.env.CHROME_PATH);
-                console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
-                
-                // Use CHROME_PATH first (set by the buildpack), then fallback
-                const executablePath = process.env.CHROME_PATH || 
-                                      process.env.PUPPETEER_EXECUTABLE_PATH || 
-                                      '/app/.chromium/bin/chrome';
-                
-                console.log('🐧 Using executable path:', executablePath);
-                
-                browser = await puppeteer.launch({
-                    executablePath: '/app/.chrome-for-testing/chrome-linux64/chrome',
-                    headless: true, // Always use headless in production
+                let browser: any = null;
+                  // 1) Determine the executablePath that chrome-for-testing buildpack set
+                  //    (chrome-for-testing automatically sets process.env.PUPPETEER_EXECUTABLE_PATH)
+                  const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH!;
+                  console.log('🐧 Using Chrome binary at:', executablePath);
+            
+                  // 2) Launch Puppeteer with only the required flags
+                  browser = await puppeteer.launch({
+                    headless: !isDev, 
                     args: [
                       '--no-sandbox',
                       '--disable-setuid-sandbox',
                       '--disable-dev-shm-usage',
-                      '--disable-accelerated-2d-canvas',
-                      '--no-first-run',
-                      '--no-zygote',
-                      '--single-process',
-                      '--disable-gpu',
-                      '--disable-background-timer-throttling',
-                      '--disable-backgrounding-occluded-windows',
-                      '--disable-renderer-backgrounding',
-                      '--disable-features=TranslateUI',
-                      '--disable-ipc-flooding-protection',
-                      '--disable-extensions',
-                      '--disable-plugins',
-                      '--disable-images', // Disable image loading to save memory
-                      '--disable-javascript', // Only if you don't need JS execution
-                      '--virtual-time-budget=10000', // Limit execution time
-                      '--memory-pressure-off',
-                      '--max_old_space_size=460' // Limit memory usage
                     ],
-                    timeout: 30000, // 30 second timeout
-                    defaultViewport: { width: 1280, height: 720 }
+                    executablePath,
+                    defaultViewport: { width: 1280, height: 800 },
+                    timeout: 60000, // 60s launch timeout
                   });
-                  
+
           const page = await browser.newPage()
           
           await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
