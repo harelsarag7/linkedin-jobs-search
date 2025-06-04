@@ -269,7 +269,8 @@ export const usersController = {
                       '--disable-dev-shm-usage',
                     ],
                     defaultViewport: { width: 1280, height: 800 },
-                    executablePath: '/opt/buildpacks/chrome-for-testing/bin/chrome', // Use the path set by the buildpack
+                    // using https://github.com/jontewks/puppeteer-heroku-buildpack
+                    executablePath: '/app/.chromium/bin/chrome',
                     timeout: 60000, // 60s launch timeout
                   });
 
