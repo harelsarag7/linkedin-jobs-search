@@ -299,7 +299,7 @@ export const usersController = {
     
           // 5) Click “Sign in”
           await page.click('button[aria-label="Sign in"]')
-        //   await page.waitForNavigation({ timeout: 10000 })
+          await page.waitForNavigation({ waitUntil: 'domcontentloaded', timeout: 30000 })
         
     
           const client = await page.target().createCDPSession()
