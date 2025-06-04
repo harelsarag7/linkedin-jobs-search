@@ -258,7 +258,8 @@ export const usersController = {
                 let browser: any = null;
                   // 1) Determine the executablePath that chrome-for-testing buildpack set
                   //    (chrome-for-testing automatically sets process.env.PUPPETEER_EXECUTABLE_PATH)
-            
+                  const executablePath = await puppeteer.executablePath();
+      console.log('🐧 Found Puppeteer Chromium at:', executablePath);
                   // 2) Launch Puppeteer with only the required flags
                   browser = await puppeteer.launch({
                     headless: !isDev, 
@@ -269,7 +270,7 @@ export const usersController = {
                     ],
                     defaultViewport: { width: 1280, height: 800 },
                     // using https://github.com/jontewks/puppeteer-heroku-buildpack
-                    executablePath: '/app/.chromium/bin/chrome',
+                    executablePath,
                     timeout: 60000, // 60s launch timeout
                   });
 
