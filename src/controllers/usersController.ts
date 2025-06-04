@@ -5,7 +5,7 @@ import { getUserStatsService, saveLiAtForUser, updateUserProfile } from '../serv
 import { uploadFileToCloudinary } from '../services/cloudinary';
 import fs from 'fs/promises';
 import { JobType } from '../types/Jobs';
-import puppeteer from 'puppeteer';
+const puppeteer = require('puppeteer-core');
 import { extractKeywordsFromResumeUrl } from '../services/openai';
 
 const isDev = process.env.NODE_ENV === "development";
@@ -227,35 +227,46 @@ export const usersController = {
 
         //   })
         // 2) Launch Puppeteer
-                console.log('🐧 Environment check:');
-                console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
-                console.log('CHROME_PATH:', process.env.CHROME_PATH);
+                // console.log('🐧 Environment check:');
+                // console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
+                // console.log('CHROME_PATH:', process.env.CHROME_PATH);
 
-                // Determine the correct executable path
-                const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || 
-                                    process.env.CHROME_PATH || 
-                                    '/app/.chromium/bin/chrome';
+                // // Determine the correct executable path
+                // const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || 
+                //                     process.env.CHROME_PATH || 
+                //                     '/app/.chromium/bin/chrome';
 
-                console.log('🐧 Using executable path:', executablePath);
+                // console.log('🐧 Using executable path:', executablePath);
+
+                // browser = await puppeteer.launch({
+                // headless: !isDev, // Use headless in production
+                // args: [
+                //     '--no-sandbox',
+                //     '--disable-setuid-sandbox',
+                //     '--disable-dev-shm-usage',
+                //     '--disable-accelerated-2d-canvas',
+                //     '--no-first-run',
+                //     '--no-zygote',
+                //     '--single-process', // Important for Heroku
+                //     '--disable-gpu'
+                // ],
+                // executablePath: executablePath,
+                // slowMo: isDev ? 200 : 0,
+                // defaultViewport: null,
+                // devtools: isDev
+                // });
 
                 browser = await puppeteer.launch({
-                headless: !isDev, // Use headless in production
-                args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--single-process', // Important for Heroku
-                    '--disable-gpu'
-                ],
-                executablePath: executablePath,
-                slowMo: isDev ? 200 : 0,
-                defaultViewport: null,
-                devtools: isDev
-                });
-
+                    executablePath: '/app/.chromium/bin/chrome',
+                    headless: !isDev,
+                    args: [
+                      '--no-sandbox',
+                      '--disable-setuid-sandbox',
+                      '--disable-dev-shm-usage',
+                      '--single-process'
+                    ]
+                  });
+                  
           const page = await browser.newPage()
           
           await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
