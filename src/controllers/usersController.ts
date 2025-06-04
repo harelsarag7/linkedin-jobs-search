@@ -219,6 +219,7 @@ export const usersController = {
             slowMo: 200,      // 🔍 Slow actions down so you can watch
             defaultViewport: null,
             devtools: true, // 🔧 Open DevTools for debugging
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
             // args: ['--start-maximized'], // optional: open full window
           })
           const page = await browser.newPage()
