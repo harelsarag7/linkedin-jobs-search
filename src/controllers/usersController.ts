@@ -257,16 +257,34 @@ export const usersController = {
                 // devtools: isDev
                 // });
 
+                console.log('🐧 Environment check:');
+                console.log('CHROME_PATH:', process.env.CHROME_PATH);
+                console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
+                
+                // Use CHROME_PATH first (set by the buildpack), then fallback
+                const executablePath = process.env.CHROME_PATH || 
+                                      process.env.PUPPETEER_EXECUTABLE_PATH || 
+                                      '/app/.chromium/bin/chrome';
+                
+                console.log('🐧 Using executable path:', executablePath);
+                
                 browser = await puppeteer.launch({
-                    executablePath: '/app/.chromium/bin/chrome',
-                    headless: !isDev,
-                    args: [
-                      '--no-sandbox',
-                      '--disable-setuid-sandbox',
-                      '--disable-dev-shm-usage',
-                      '--single-process'
-                    ]
-                  });
+                  executablePath: executablePath,
+                  headless: !isDev,
+                  args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process',
+                    '--disable-gpu'
+                  ],
+                  slowMo: isDev ? 200 : 0,
+                  defaultViewport: null,
+                  devtools: isDev
+                });
                   
           const page = await browser.newPage()
           
