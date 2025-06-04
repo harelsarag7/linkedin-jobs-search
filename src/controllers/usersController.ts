@@ -210,22 +210,52 @@ export const usersController = {
     
         let browser: any = null
         try {
-          // 2) Launch Puppeteer
-          console.log('🐧 Puppeteer exec path:', await puppeteer.executablePath());
+        //   // 2) Launch Puppeteer
+        //   console.log('🐧 Puppeteer exec path:', await puppeteer.executablePath());
 
-          browser = await puppeteer.launch({
-            // headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+        //   browser = await puppeteer.launch({
+        //     // headless: true,
+        //     args: ['--no-sandbox', '--disable-setuid-sandbox'],
 
-            headless: isDev ? false: true, // 🔥 Make sure browser is visible
-            slowMo: 200,      // 🔍 Slow actions down so you can watch
-            defaultViewport: null,
-            devtools: true, // 🔧 Open DevTools for debugging
-            // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-            // args: ['--start-maximized'], // optional: open full window
-            // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // remove this line
+        //     headless: isDev ? false: true, // 🔥 Make sure browser is visible
+        //     slowMo: 200,      // 🔍 Slow actions down so you can watch
+        //     defaultViewport: null,
+        //     devtools: true, // 🔧 Open DevTools for debugging
+        //     // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+        //     // args: ['--start-maximized'], // optional: open full window
+        //     // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // remove this line
 
-          })
+        //   })
+        // 2) Launch Puppeteer
+                console.log('🐧 Environment check:');
+                console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
+                console.log('CHROME_PATH:', process.env.CHROME_PATH);
+
+                // Determine the correct executable path
+                const executablePath = process.env.PUPPETEER_EXECUTABLE_PATH || 
+                                    process.env.CHROME_PATH || 
+                                    '/app/.chromium/bin/chrome';
+
+                console.log('🐧 Using executable path:', executablePath);
+
+                browser = await puppeteer.launch({
+                headless: !isDev, // Use headless in production
+                args: [
+                    '--no-sandbox',
+                    '--disable-setuid-sandbox',
+                    '--disable-dev-shm-usage',
+                    '--disable-accelerated-2d-canvas',
+                    '--no-first-run',
+                    '--no-zygote',
+                    '--single-process', // Important for Heroku
+                    '--disable-gpu'
+                ],
+                executablePath: executablePath,
+                slowMo: isDev ? 200 : 0,
+                defaultViewport: null,
+                devtools: isDev
+                });
+
           const page = await browser.newPage()
           
           await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
