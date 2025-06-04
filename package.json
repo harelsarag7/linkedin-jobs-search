@@ -57,6 +57,7 @@
     "node": ">=14.0.0"
   },
   "puppeteer": {
-    "skip_chromium_download": false
+    "default_browser": "chrome",
+    "skip_download": false
   }
 }
