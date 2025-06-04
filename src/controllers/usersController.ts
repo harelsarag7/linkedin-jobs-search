@@ -5,7 +5,8 @@ import { getUserStatsService, saveLiAtForUser, updateUserProfile } from '../serv
 import { uploadFileToCloudinary } from '../services/cloudinary';
 import fs from 'fs/promises';
 import { JobType } from '../types/Jobs';
-const puppeteer = require('puppeteer-core');
+import puppeteer from 'puppeteer-core';
+
 import { extractKeywordsFromResumeUrl } from '../services/openai';
 
 const isDev = process.env.NODE_ENV === "development";
