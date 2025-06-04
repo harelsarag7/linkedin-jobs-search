@@ -269,7 +269,7 @@ export const usersController = {
                     ],
                     defaultViewport: { width: 1280, height: 800 },
                     // using https://github.com/jontewks/puppeteer-heroku-buildpack
-                    executablePath,
+                    // executablePath,
                     timeout: 60000, // 60s launch timeout
                   });
 
