@@ -213,19 +213,19 @@ export const usersController = {
         //   // 2) Launch Puppeteer
         //   console.log('🐧 Puppeteer exec path:', await puppeteer.executablePath());
 
-        //   browser = await puppeteer.launch({
-        //     // headless: true,
-        //     args: ['--no-sandbox', '--disable-setuid-sandbox'],
+          browser = await puppeteer.launch({
+            // headless: true,
+            args: ['--no-sandbox', '--disable-setuid-sandbox'],
 
-        //     headless: isDev ? false: true, // 🔥 Make sure browser is visible
-        //     slowMo: 200,      // 🔍 Slow actions down so you can watch
-        //     defaultViewport: null,
-        //     devtools: true, // 🔧 Open DevTools for debugging
-        //     // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-        //     // args: ['--start-maximized'], // optional: open full window
-        //     // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // remove this line
+            headless: isDev ? false : true, // 🔥 Make sure browser is visible
+            slowMo: 200,      // 🔍 Slow actions down so you can watch
+            defaultViewport: null,
+            devtools: isDev, // 🔧 Open DevTools for debugging
+            // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+            // args: ['--start-maximized'], // optional: open full window
+            // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // remove this line
 
-        //   })
+          })
         // 2) Launch Puppeteer
                 // console.log('🐧 Environment check:');
                 // console.log('PUPPETEER_EXECUTABLE_PATH:', process.env.PUPPETEER_EXECUTABLE_PATH);
@@ -255,23 +255,20 @@ export const usersController = {
                 // defaultViewport: null,
                 // devtools: isDev
                 // });
-                let browser: any = null;
-                  // 1) Determine the executablePath that chrome-for-testing buildpack set
-                  //    (chrome-for-testing automatically sets process.env.PUPPETEER_EXECUTABLE_PATH)
-                  const executablePath = await puppeteer.executablePath();
-      console.log('🐧 Found Puppeteer Chromium at:', executablePath);
-                  // 2) Launch Puppeteer with only the required flags
-                  browser = await puppeteer.launch({
-                    headless: !isDev, 
-                    args: [
-                      '--no-sandbox',
-                      '--disable-setuid-sandbox',
-                    ],
-                    defaultViewport: { width: 1280, height: 800 },
-                    // using https://github.com/jontewks/puppeteer-heroku-buildpack
-                    // executablePath,
-                    timeout: 60000, // 60s launch timeout
-                  });
+                // let browser: any = null;
+                //   // 1) Determine the executablePath that chrome-for-testing buildpack set
+                //   //    (chrome-for-testing automatically sets process.env.PUPPETEER_EXECUTABLE_PATH)
+                //   browser = await puppeteer.launch({
+                //     headless: !isDev, 
+                //     args: [
+                //       '--no-sandbox',
+                //       '--disable-setuid-sandbox',
+                //     ],
+                //     defaultViewport: { width: 1280, height: 800 },
+                //     // using https://github.com/jontewks/puppeteer-heroku-buildpack
+                //     // executablePath,
+                //     timeout: 60000, // 60s launch timeout
+                //   });
 
           const page = await browser.newPage()
           
