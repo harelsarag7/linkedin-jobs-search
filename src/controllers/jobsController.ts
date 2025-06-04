@@ -12,8 +12,9 @@ export const jobsController = {
       try {
         const keyword = req.query.keyword as string || '';
         const location = req.query.location as string || '';
-        
         const cookie = req.user.li_at
+        const experienceLevels = req.user.experienceLevels || null;
+        
         const email = req.user.email
         if (!email) {
             throw new Error('Email is required to fetch recent jobs');  
@@ -22,7 +23,7 @@ export const jobsController = {
         if(!cookie) {
           throw new Error('Missing li_at cookie in environment variables');
         }
-        const jobs = await fetchLinkedInJobs(cookie, keyword, location);
+        const jobs = await fetchLinkedInJobs(cookie, keyword, location, experienceLevels);
         console.log(jobs)
         await saveJobsForUser(email, jobs);
     

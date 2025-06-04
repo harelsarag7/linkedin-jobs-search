@@ -1,9 +1,20 @@
 import axios from "axios";
 import { getJobDescription } from "./jobDescription";
 import * as cheerio from "cheerio";
+import { experienceRange } from "utils/utils";
 
-export const fetchLinkedInJobs = async (cookie: string, keyword: string, location: string): Promise<any[]> => {
-  const searchUrl = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}&f_TPR=r7200`;
+type ExperienceLevel = keyof typeof experienceRange;
+
+export const fetchLinkedInJobs = async (cookie: string, keyword: string, location: string, experienceLevels: ExperienceLevel[]): Promise<any[]> => {
+  let searchUrl = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}&f_TPR=r7200`;
+
+  if (experienceLevels && experienceLevels.length) {
+    const encodedExperience = `&f_E=${experienceLevels
+      .map(level => experienceRange[level])
+      .filter(Boolean)
+      .join(',')}`;
+    searchUrl += encodedExperience;
+  }
 
 
   const res = await axios.get(searchUrl, {

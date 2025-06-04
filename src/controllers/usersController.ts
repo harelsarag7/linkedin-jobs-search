@@ -40,9 +40,21 @@ export const usersController = {
             fullName, phone, email, location, bio,
             linkedinUrl, githubUrl, personalWebsite, desiredJobTitle,
             employmentType, minSalary, maxSalary, searchRadius,
-            openToRemote, skills, blockedCompanies, keywords
+            openToRemote, skills, blockedCompanies, keywords, experienceLevels
           } = req.body;
     
+          let parsedExperienceLevels: string[] = [];
+            if (typeof experienceLevels === 'string') {
+            try {
+                parsedExperienceLevels = JSON.parse(experienceLevels);
+            } catch (err) {
+                console.error("❌ Failed to parse experienceLevels:", experienceLevels);
+            }
+            } else if (Array.isArray(experienceLevels)) {
+            parsedExperienceLevels = experienceLevels;
+            }
+
+
           const updates: Partial<typeof user> = {
             ...(fullName && { fullName }),
             ...(phone && { phone }),
@@ -61,7 +73,8 @@ export const usersController = {
             ...(skills && { skills }),
             ...(blockedCompanies && { blockedCompanies }),
             ...(keywords && { keywords }),
-          };
+            ...(parsedExperienceLevels.length && { experienceLevels: parsedExperienceLevels }),
+        };
     
           if (req.file) {
             const url = await uploadFileToCloudinary(user.id, req.file.path, req.file.originalname);
@@ -207,7 +220,7 @@ export const usersController = {
             defaultViewport: null,
             devtools: true, // 🔧 Open DevTools for debugging
             // args: ['--start-maximized'], // optional: open full window
-            // executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome', // macOS Chrome path
+            executablePath: process.env.CHROME_BIN || puppeteer.executablePath(), // this works with the buildpack
           })
           const page = await browser.newPage()
           

@@ -12,4 +12,11 @@ export function extractJobId(url: string): string | null {
     return match ? match[1] : null;
   }
   
-  
+  export const experienceRange = {
+    internship: "1",
+    "entry level": "2",
+    associate: "3",
+    senior: "4",
+    director: "5",
+    executive: "6",
+  } as const;

@@ -80,6 +80,7 @@ export async function updateUserProfile(
         li_at: result.li_at ?? undefined,
         resumeUrl: result.resumeUrl ?? undefined,
         keywords: result.keywords ?? [],
+        experienceLevels: result.experienceLevels ?? [], // Default to 'entry level'
       }
   
       return cleaned

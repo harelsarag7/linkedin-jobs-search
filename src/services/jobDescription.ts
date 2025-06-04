@@ -8,7 +8,7 @@ export const getJobDescription = async (url: string): Promise<string> => {
       defaultViewport: null,
       devtools: true,
       args: ['--start-maximized'],
-      executablePath: '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      executablePath: process.env.CHROME_BIN || puppeteer.executablePath(), // this works with the buildpack
     });
     const page = await browser.newPage();
   

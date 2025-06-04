@@ -14,7 +14,7 @@ export function startLinkedInJobCron() {
     const users = await getAllUsers()
 
     for (const user of users) {
-      const { email, li_at, keywords, location } = user
+      const { email, li_at, keywords, location, experienceLevels } = user
 
       if (!li_at) continue
       if (!Array.isArray(keywords) || keywords.length === 0) continue
@@ -23,7 +23,7 @@ export function startLinkedInJobCron() {
 
       for (const keyword of keywords) {
         try {
-          const jobs = await fetchLinkedInJobs(li_at, keyword, userLocation)
+          const jobs = await fetchLinkedInJobs(li_at, keyword, userLocation, experienceLevels)
           await saveJobsForUser(email, jobs)
           console.log(`✅ Saved jobs for ${email} | keyword: ${keyword}`)
         } catch (err: unknown) {

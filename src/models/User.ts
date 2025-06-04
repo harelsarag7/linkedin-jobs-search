@@ -12,6 +12,7 @@ const userSchema = new mongoose.Schema({
   personalWebsite: { type: String, required: false },
   desiredJobTitle: { type: String, required: false },
   employmentType: { type: String, required: false },
+  experienceLevels: { type: [String], required: false }, // entry, mid, senior
   minSalary: { type: Number, required: false, default: 0 },
   maxSalary: { type: Number, required: false, default: 0 },
   searchRadius: { type: Number, required: false, default: 0 },
