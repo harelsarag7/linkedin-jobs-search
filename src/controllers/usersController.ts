@@ -215,11 +215,13 @@ export const usersController = {
 
           browser = await puppeteer.launch({
             // headless: true,
-            args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            // args: ['--no-sandbox', '--disable-setuid-sandbox'],
+            args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
+            defaultViewport: { width: 1280, height: 800 },
+            timeout: 60000,
 
-            headless: isDev ? false : true, // 🔥 Make sure browser is visible
+            headless: !isDev,
             slowMo: 200,      // 🔍 Slow actions down so you can watch
-            defaultViewport: null,
             devtools: isDev, // 🔧 Open DevTools for debugging
             // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
             // args: ['--start-maximized'], // optional: open full window
@@ -272,23 +274,35 @@ export const usersController = {
 
           const page = await browser.newPage()
           
-          await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
-          await page.setUserAgent(
-            'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
-          );
+        //   await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
+        //   await page.setUserAgent(
+        //     'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/137.0.0.0 Safari/537.36'
+        //   );
 
-          // 3) Go to LinkedIn login page
+        await page.setExtraHTTPHeaders({ 'Accept-Language': 'en-US,en;q=0.9' });
+        await page.setUserAgent(
+          'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) ' +
+          'AppleWebKit/537.36 (KHTML, like Gecko) ' +
+          'Chrome/137.0.0.0 Safari/537.36'
+        );
+                  // 3) Go to LinkedIn login page
           await page.goto('https://www.linkedin.com/login', {
-            waitUntil: 'domcontentloaded',
-            timeout: 30000,
-          })
+            // waitUntil: 'domcontentloaded',
+            // timeout: 30000,
+            waitUntil: 'networkidle2',
+            timeout: 60000,  
+        })
     
           // 4) Fill email + password
           await page.type('input#username', linkedInEmail, { delay: 50 })
           await page.type('input#password', linkedInPassword, { delay: 50 })
     
           // 5) Click “Sign in”
-          await page.click('button[aria-label="Sign in"]')
+        //   await page.click('button[aria-label="Sign in"]')
+          await Promise.all([
+            page.click('button[type="submit"]'),
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }),
+          ]);
     
           const client = await page.target().createCDPSession()
           const allCookies = (await client.send('Network.getAllCookies')).cookies
@@ -299,6 +313,8 @@ export const usersController = {
     
           // 8) Find the li_at cookie
           if (!liAtCookie) {
+            console.error('Current URL after login:', page.url());
+
             res
               .status(500)
               .json({ success: false, message: 'Could not extract li_at from LinkedIn' })
