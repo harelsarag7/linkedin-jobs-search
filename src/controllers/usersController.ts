@@ -266,7 +266,6 @@ export const usersController = {
                     args: [
                       '--no-sandbox',
                       '--disable-setuid-sandbox',
-                      '--disable-dev-shm-usage',
                     ],
                     defaultViewport: { width: 1280, height: 800 },
                     // using https://github.com/jontewks/puppeteer-heroku-buildpack
