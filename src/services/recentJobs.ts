@@ -1,7 +1,7 @@
 import axios from "axios";
 import { getJobDescription } from "./jobDescription";
 import * as cheerio from "cheerio";
-import { experienceRange } from "utils/utils";
+import { experienceRange } from "../utils/utils";
 
 type ExperienceLevel = keyof typeof experienceRange;
 
