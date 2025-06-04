@@ -8,7 +8,7 @@ export const getJobDescription = async (url: string): Promise<string> => {
       defaultViewport: null,
       devtools: true,
       args: ['--start-maximized'],
-      executablePath: process.env.CHROME_BIN || puppeteer.executablePath(), // this works with the buildpack
+      executablePath: '/app/.apt/usr/bin/google-chrome', // path injected by Heroku buildpack
     });
     const page = await browser.newPage();
   

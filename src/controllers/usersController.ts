@@ -220,7 +220,7 @@ export const usersController = {
             defaultViewport: null,
             devtools: true, // 🔧 Open DevTools for debugging
             // args: ['--start-maximized'], // optional: open full window
-            executablePath: process.env.CHROME_BIN || puppeteer.executablePath(), // this works with the buildpack
+            executablePath: '/app/.apt/usr/bin/google-chrome', // path injected by Heroku buildpack
           })
           const page = await browser.newPage()
           
