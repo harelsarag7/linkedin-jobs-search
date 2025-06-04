@@ -211,6 +211,8 @@ export const usersController = {
         let browser: any = null
         try {
           // 2) Launch Puppeteer
+          console.log('🐧 Puppeteer exec path:', await puppeteer.executablePath());
+
           browser = await puppeteer.launch({
             // headless: true,
             args: ['--no-sandbox', '--disable-setuid-sandbox'],
