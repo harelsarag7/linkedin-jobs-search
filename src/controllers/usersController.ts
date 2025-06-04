@@ -7,6 +7,7 @@ import fs from 'fs/promises';
 import { JobType } from '../types/Jobs';
 const puppeteer = require('puppeteer-core');
 import { extractKeywordsFromResumeUrl } from '../services/openai';
+import { executablePath } from 'puppeteer';
 
 const isDev = process.env.NODE_ENV === "development";
 
@@ -268,6 +269,7 @@ export const usersController = {
                       '--disable-dev-shm-usage',
                     ],
                     defaultViewport: { width: 1280, height: 800 },
+                    executablePath: '/opt/buildpacks/chrome-for-testing/bin/chrome', // Use the path set by the buildpack
                     timeout: 60000, // 60s launch timeout
                   });
 
