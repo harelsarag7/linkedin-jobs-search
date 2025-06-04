@@ -287,7 +287,7 @@ export const usersController = {
         );
                   // 3) Go to LinkedIn login page
           await page.goto('https://www.linkedin.com/login', {
-            // waitUntil: 'domcontentloaded',
+            waitUntil: 'domcontentloaded',
             timeout: 10000,
             // waitUntil: 'networkidle2',
             // timeout: 60000,  
@@ -298,11 +298,9 @@ export const usersController = {
           await page.type('input#password', linkedInPassword, { delay: 50 })
     
           // 5) Click “Sign in”
-        //   await page.click('button[aria-label="Sign in"]')
-          await Promise.all([
-            page.click('button[type="submit"]'),
-            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 60000 }),
-          ]);
+          await page.click('button[aria-label="Sign in"]')
+          await page.waitForNavigation({ timeout: 10000 })
+        
     
           const client = await page.target().createCDPSession()
           const allCookies = (await client.send('Network.getAllCookies')).cookies
