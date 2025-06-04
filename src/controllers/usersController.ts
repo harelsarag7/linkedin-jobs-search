@@ -221,6 +221,8 @@ export const usersController = {
             devtools: true, // 🔧 Open DevTools for debugging
             // executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
             // args: ['--start-maximized'], // optional: open full window
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH, // remove this line
+
           })
           const page = await browser.newPage()
           
