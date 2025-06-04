@@ -306,22 +306,33 @@ export const usersController = {
                 console.log('🐧 Using executable path:', executablePath);
                 
                 browser = await puppeteer.launch({
-                  executablePath: '/app/.chrome-for-testing/chrome-linux64/chrome',
-                  headless: !isDev,
-                  args: [
-                    '--no-sandbox',
-                    '--disable-setuid-sandbox',
-                    '--disable-dev-shm-usage',
-                    '--disable-accelerated-2d-canvas',
-                    '--no-first-run',
-                    '--no-zygote',
-                    '--single-process',
-                    '--disable-gpu'
-                  ],
-                  slowMo: isDev ? 200 : 0,
-                  defaultViewport: null,
-                  devtools: isDev
-                });
+                    executablePath: '/app/.chrome-for-testing/chrome-linux64/chrome',
+                    headless: true, // Always use headless in production
+                    args: [
+                      '--no-sandbox',
+                      '--disable-setuid-sandbox',
+                      '--disable-dev-shm-usage',
+                      '--disable-accelerated-2d-canvas',
+                      '--no-first-run',
+                      '--no-zygote',
+                      '--single-process',
+                      '--disable-gpu',
+                      '--disable-background-timer-throttling',
+                      '--disable-backgrounding-occluded-windows',
+                      '--disable-renderer-backgrounding',
+                      '--disable-features=TranslateUI',
+                      '--disable-ipc-flooding-protection',
+                      '--disable-extensions',
+                      '--disable-plugins',
+                      '--disable-images', // Disable image loading to save memory
+                      '--disable-javascript', // Only if you don't need JS execution
+                      '--virtual-time-budget=10000', // Limit execution time
+                      '--memory-pressure-off',
+                      '--max_old_space_size=460' // Limit memory usage
+                    ],
+                    timeout: 30000, // 30 second timeout
+                    defaultViewport: { width: 1280, height: 720 }
+                  });
                   
           const page = await browser.newPage()
           
