@@ -3,14 +3,51 @@ import { getAppliedJobs, getReadyToApplyJobs } from '../services/db';
 import { RequestWithUser } from '../types/request';
 import { getUserStatsService, saveLiAtForUser, updateUserProfile } from '../services/user';
 import { uploadFileToCloudinary } from '../services/cloudinary';
-import fs from 'fs/promises';
+// import fs from 'fs/promises';
 import { JobType } from '../types/Jobs';
 import puppeteer from 'puppeteer-core';
 
 import { extractKeywordsFromResumeUrl } from '../services/openai';
 
 const isDev = process.env.NODE_ENV === "development";
+console.log('🐧 Environment check:');
+console.log('CHROME_PATH:', process.env.CHROME_PATH);
 
+// Check if the file exists and what's in the directory
+const fs = require('fs');
+const path = require('path');
+
+try {
+  console.log('🔍 Checking /app/.chromium/bin/chrome exists:', fs.existsSync('/app/.chromium/bin/chrome'));
+  console.log('🔍 Checking /app/.chromium exists:', fs.existsSync('/app/.chromium'));
+  
+  if (fs.existsSync('/app/.chromium')) {
+    console.log('🔍 Contents of /app/.chromium:', fs.readdirSync('/app/.chromium'));
+  }
+  
+  if (fs.existsSync('/app/.chromium/bin')) {
+    console.log('🔍 Contents of /app/.chromium/bin:', fs.readdirSync('/app/.chromium/bin'));
+  }
+  
+  // Check other common Chrome locations
+  const commonPaths = [
+    '/usr/bin/google-chrome',
+    '/usr/bin/google-chrome-stable',
+    '/usr/bin/chromium',
+    '/usr/bin/chromium-browser',
+    '/opt/google/chrome/chrome',
+    '/app/.chrome-for-testing/chrome-linux64/chrome'
+  ];
+  
+  commonPaths.forEach(p => {
+    if (fs.existsSync(p)) {
+      console.log('✅ Found Chrome at:', p);
+    }
+  });
+  
+} catch (error: any) {
+  console.log('🚨 Error checking paths:', error?.message);
+}
 export const usersController = {
     async getUserData(req: RequestWithUser, res: Response, next: NextFunction) {
         try {
