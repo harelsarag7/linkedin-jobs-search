@@ -288,9 +288,9 @@ export const usersController = {
                   // 3) Go to LinkedIn login page
           await page.goto('https://www.linkedin.com/login', {
             // waitUntil: 'domcontentloaded',
-            // timeout: 30000,
-            waitUntil: 'networkidle2',
-            timeout: 60000,  
+            timeout: 10000,
+            // waitUntil: 'networkidle2',
+            // timeout: 60000,  
         })
     
           // 4) Fill email + password
