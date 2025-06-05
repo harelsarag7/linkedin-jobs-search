@@ -74,3 +74,26 @@ export async function extractKeywordsFromResumeUrl(resumeUrl: string): Promise<s
   const text = await extractTextFromResumeUrl(resumeUrl);
   return extractKeywordsFromText(text);
 }
+
+export async function detectMatchScore(
+  resumeText: string,
+  jobDescription: string
+): Promise<number> {
+  const prompt = `
+  You are an AI assistant that evaluates how well a resume matches a job description. Your task is to analyze the provided resume text and job description, and return a match score from 0 to 100, where 0 means no match and 100 means perfect match.
+  Resume text:  
+  ${resumeText}
+  Job description:
+  ${jobDescription}
+    `.trim();
+    
+  const response = await client.chat.completions.create({
+    model: "gpt-4o-mini",
+    messages: [{ role: "user", content: prompt }],
+    temperature: 0.3,
+    max_tokens: 10,
+  });
+  const raw = response.choices[0]?.message?.content?.trim() || "0";
+  const score = parseInt(raw, 10);
+  return isNaN(score) ? 0 : Math.min(Math.max(score, 0), 100);
+}

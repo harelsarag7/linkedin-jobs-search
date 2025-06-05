@@ -186,7 +186,7 @@ export const usersController = {
         }
     },
 
-    async connectLinkedIn(
+    async connectLinkedIn2(
         req: RequestWithUser,
         res: Response,
         next: NextFunction
@@ -336,4 +336,224 @@ export const usersController = {
           return
         }
       },
+      async connectLinkedIn(
+        req: RequestWithUser,
+        res: Response,
+        next: NextFunction
+      ): Promise<void> {
+        const ourUser = req.user
+        
+        if (!ourUser) {
+          res.status(401).json({ success: false, message: 'Not authenticated.' })
+          return
+        }
+      
+        const linkedInEmail = req.body.email as string
+        const linkedInPassword = req.body.password as string
+        if (!linkedInEmail || !linkedInPassword) {
+          res.status(400).json({ success: false, message: 'LinkedIn email + password are required' })
+          return
+        }
+      
+        // let browser: any = null
+        
+        try {
+          // Respond immediately to avoid Heroku timeout
+          res.json({ success: true, message: 'LinkedIn connection process started. Please check back in a moment.' })
+          
+          // Continue processing in background
+          await processLinkedInConnection(ourUser.id, linkedInEmail, linkedInPassword)
+          
+        } catch (err: any) {
+          console.error('Error in connectLinkedIn:', err)
+          // Since we already responded, log error and potentially notify user through other means
+          // Could save error status to database for user to check later
+        }
+      }
+    
+
     }
+
+      
+      // Separate function to handle the actual LinkedIn connection
+      async function processLinkedInConnection(userId: string, email: string, password: string): Promise<void> {
+        let browser: any = null
+        
+        try {
+          console.log('🚀 Starting LinkedIn connection process for user:', userId)
+          
+          // Enhanced Puppeteer configuration for Heroku
+          browser = await puppeteer.launch({
+            headless: true, // Always headless in production
+            args: [
+              '--no-sandbox',
+              '--disable-setuid-sandbox',
+              '--disable-dev-shm-usage',
+              '--disable-accelerated-2d-canvas',
+              '--no-first-run',
+              '--no-zygote',
+              '--single-process', // Important for Heroku
+              '--disable-gpu',
+              '--disable-background-timer-throttling',
+              '--disable-backgrounding-occluded-windows',
+              '--disable-renderer-backgrounding',
+              '--disable-features=TranslateUI',
+              '--disable-ipc-flooding-protection',
+              '--memory-pressure-off',
+              '--max-old-space-size=4096'
+            ],
+            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+            defaultViewport: { width: 1366, height: 768 },
+            timeout: 0, // No timeout for launch
+          })
+      
+          const page = await browser.newPage()
+          
+          // Set longer timeouts for navigation and waiting
+          page.setDefaultNavigationTimeout(60000) // 60 seconds
+          page.setDefaultTimeout(30000) // 30 seconds for other operations
+          
+          // Enhanced headers and user agent
+          await page.setExtraHTTPHeaders({
+            'Accept-Language': 'en-US,en;q=0.9',
+            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
+            'Accept-Encoding': 'gzip, deflate, br',
+            'DNT': '1',
+            'Connection': 'keep-alive',
+            'Upgrade-Insecure-Requests': '1',
+          });
+          
+          await page.setUserAgent(
+            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+          );
+      
+          console.log('📍 Navigating to LinkedIn login page...')
+          
+          // Navigate with retry logic
+          let loginSuccess = false
+          let retryCount = 0
+          const maxRetries = 3
+          
+          while (!loginSuccess && retryCount < maxRetries) {
+            try {
+              await page.goto('https://www.linkedin.com/login', {
+                waitUntil: 'domcontentloaded',
+                timeout: 30000,
+              })
+              
+              // Wait for login form to load
+              await page.waitForSelector('input#username', { timeout: 10000 })
+              await page.waitForSelector('input#password', { timeout: 10000 })
+              
+              console.log('📝 Filling login credentials...')
+              
+              // Clear and type credentials with human-like delays
+              await page.click('input#username', { clickCount: 3 })
+              await page.type('input#username', email, { delay: 100 })
+              
+              await page.click('input#password', { clickCount: 3 })
+              await page.type('input#password', password, { delay: 100 })
+              
+              // Wait a bit before clicking submit
+              await page.waitForTimeout(1000)
+              
+              console.log('🔐 Submitting login form...')
+              
+              // Click submit and wait for navigation
+              const [response] = await Promise.all([
+                page.waitForNavigation({ 
+                  waitUntil: 'domcontentloaded', 
+                  timeout: 45000 
+                }),
+                page.click('button[aria-label="Sign in"]')
+              ])
+              
+              // Check if login was successful
+              const currentUrl = page.url()
+              console.log('📍 Current URL after login:', currentUrl)
+              
+              if (currentUrl.includes('/feed') || currentUrl.includes('/in/') || !currentUrl.includes('/login')) {
+                loginSuccess = true
+                console.log('✅ Login successful!')
+              } else {
+                throw new Error('Login may have failed - still on login page')
+              }
+              
+            } catch (error: any) {
+              retryCount++
+              console.log(`⚠️ Login attempt ${retryCount} failed:`, error.message)
+              
+              if (retryCount < maxRetries) {
+                console.log('🔄 Retrying login...')
+                await page.waitForTimeout(2000) // Wait before retry
+              }
+            }
+          }
+          
+          if (!loginSuccess) {
+            throw new Error('Failed to login after multiple attempts')
+          }
+          
+          // Extract cookies
+          console.log('🍪 Extracting cookies...')
+          const client = await page.target().createCDPSession()
+          const allCookies = (await client.send('Network.getAllCookies')).cookies
+          const liAtCookie = allCookies.find((c: any) => c.name === 'li_at')?.value
+          
+          if (!liAtCookie) {
+            throw new Error('Could not extract li_at cookie from LinkedIn')
+          }
+          
+          console.log('💾 Saving LinkedIn token for user...')
+          await saveLiAtForUser(userId, liAtCookie)
+          
+          console.log('✅ LinkedIn connection completed successfully!')
+          
+        } catch (error) {
+          console.error('❌ Error in processLinkedInConnection:', error)
+          // You could save the error to database here for user to see later
+          // await saveLinkedInConnectionError(userId, error.message)
+          
+        } finally {
+          if (browser) {
+            try {
+              await browser.close()
+              console.log('🔒 Browser closed')
+            } catch (closeError) {
+              console.error('Error closing browser:', closeError)
+            }
+          }
+        }
+      }
+      
+          // Helper function to implement exponential backoff for retries
+      async function delay(ms: number): Promise<void> {
+        return new Promise(resolve => setTimeout(resolve, ms))
+      }
+      
+      // Enhanced error handling wrapper
+      async function withRetry<T>(
+        operation: () => Promise<T>, 
+        maxRetries: number = 3,
+        baseDelay: number = 1000
+      ): Promise<T> {
+        let lastError: Error
+        
+        for (let i = 0; i <= maxRetries; i++) {
+          try {
+            return await operation()
+          } catch (error) {
+            lastError = error as Error
+            
+            if (i === maxRetries) {
+              throw lastError
+            }
+            
+            const delayMs = baseDelay * Math.pow(2, i) // Exponential backoff
+            console.log(`Retry ${i + 1}/${maxRetries} after ${delayMs}ms delay...`)
+            await delay(delayMs)
+          }
+        }
+        
+        throw lastError!
+      }
