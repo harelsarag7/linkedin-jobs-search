@@ -373,187 +373,427 @@ export const usersController = {
     
 
     }
-
+// Separate function to handle the actual LinkedIn connection
+async function processLinkedInConnection(userId: string, email: string, password: string): Promise<void> {
+    let browser: any = null
+    
+    try {
+      console.log('🚀 Starting LinkedIn connection process for user:', userId)
       
-      // Separate function to handle the actual LinkedIn connection
-      async function processLinkedInConnection(userId: string, email: string, password: string): Promise<void> {
-        let browser: any = null
-        
+      // Enhanced Puppeteer configuration for Heroku with stealth techniques
+      browser = await puppeteer.launch({
+        headless: true, // Always headless in production
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-dev-shm-usage',
+          '--disable-accelerated-2d-canvas',
+          '--no-first-run',
+          '--no-zygote',
+          '--single-process', // Important for Heroku
+          '--disable-gpu',
+          '--disable-background-timer-throttling',
+          '--disable-backgrounding-occluded-windows',
+          '--disable-renderer-backgrounding',
+          '--disable-features=TranslateUI',
+          '--disable-ipc-flooding-protection',
+          '--memory-pressure-off',
+          '--max-old-space-size=4096',
+          '--disable-blink-features=AutomationControlled', // Hide automation flags
+          '--disable-features=VizDisplayCompositor',
+          '--disable-extensions',
+          '--disable-plugins',
+          '--disable-web-security',
+          '--disable-features=site-per-process',
+          '--window-size=1366,768'
+        ],
+        executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+        defaultViewport: null, // Use full window size
+        timeout: 0, // No timeout for launch
+      })
+  
+      const page = await browser.newPage()
+      
+      // Set longer timeouts for navigation and waiting
+      page.setDefaultNavigationTimeout(60000) // 60 seconds
+      page.setDefaultTimeout(30000) // 30 seconds for other operations
+      
+// ... inside your Puppeteer setup
+await page.evaluateOnNewDocument(() => {
+    // Hide webdriver property
+    Object.defineProperty(navigator, 'webdriver', {
+      get: () => undefined,
+    });
+  
+    // Mock plugins
+    Object.defineProperty(navigator, 'plugins', {
+      get: () => [1, 2, 3, 4, 5],
+    });
+  
+    // Mock languages
+    Object.defineProperty(navigator, 'languages', {
+      get: () => ['en-US', 'en'],
+    });
+  
+    // Override permissions.query with a proper PermissionStatus object
+    const originalQuery = window.navigator.permissions.query.bind(window.navigator.permissions);
+    window.navigator.permissions.query = (parameters: any): Promise<PermissionStatus> => {
+      if (parameters.name === 'notifications') {
+        // Return a fake PermissionStatus with all required properties
+        const fakeStatus = {
+          state: 'granted' as PermissionState,
+          onchange: null,
+          addEventListener: (_: string, __: any) => {},
+          removeEventListener: (_: string, __: any) => {},
+          dispatchEvent: (_: Event) => false,
+        } as PermissionStatus;
+  
+        return Promise.resolve(fakeStatus);
+      }
+      return originalQuery(parameters);
+    };
+  });
+  
+      
+      // Enhanced headers and user agent
+      await page.setExtraHTTPHeaders({
+        'Accept-Language': 'en-US,en;q=0.9',
+        'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8',
+        'Accept-Encoding': 'gzip, deflate, br',
+        'DNT': '1',
+        'Connection': 'keep-alive',
+        'Upgrade-Insecure-Requests': '1',
+        'Sec-Fetch-Dest': 'document',
+        'Sec-Fetch-Mode': 'navigate',
+        'Sec-Fetch-Site': 'none',
+        'Cache-Control': 'max-age=0',
+      });
+      
+      await page.setUserAgent(
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
+      );
+  
+      console.log('📍 Navigating to LinkedIn login page...')
+      
+      // Navigate with retry logic
+      let loginSuccess = false
+      let retryCount = 0
+      const maxRetries = 3
+      
+      while (!loginSuccess && retryCount < maxRetries) {
         try {
-          console.log('🚀 Starting LinkedIn connection process for user:', userId)
-          
-          // Enhanced Puppeteer configuration for Heroku
-          browser = await puppeteer.launch({
-            headless: true, // Always headless in production
-            args: [
-              '--no-sandbox',
-              '--disable-setuid-sandbox',
-              '--disable-dev-shm-usage',
-              '--disable-accelerated-2d-canvas',
-              '--no-first-run',
-              '--no-zygote',
-              '--single-process', // Important for Heroku
-              '--disable-gpu',
-              '--disable-background-timer-throttling',
-              '--disable-backgrounding-occluded-windows',
-              '--disable-renderer-backgrounding',
-              '--disable-features=TranslateUI',
-              '--disable-ipc-flooding-protection',
-              '--memory-pressure-off',
-              '--max-old-space-size=4096'
-            ],
-            executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
-            defaultViewport: { width: 1366, height: 768 },
-            timeout: 0, // No timeout for launch
+          // Navigate with retry logic and human-like behavior
+          await page.goto('https://www.linkedin.com/login', {
+            waitUntil: 'domcontentloaded',
+            timeout: 30000,
           })
-      
-          const page = await browser.newPage()
           
-          // Set longer timeouts for navigation and waiting
-          page.setDefaultNavigationTimeout(60000) // 60 seconds
-          page.setDefaultTimeout(30000) // 30 seconds for other operations
+          // Add some random delay to appear more human
+          await page.waitForTimeout(Math.random() * 2000 + 1000)
           
-          // Enhanced headers and user agent
-          await page.setExtraHTTPHeaders({
-            'Accept-Language': 'en-US,en;q=0.9',
-            'Accept': 'text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8',
-            'Accept-Encoding': 'gzip, deflate, br',
-            'DNT': '1',
-            'Connection': 'keep-alive',
-            'Upgrade-Insecure-Requests': '1',
-          });
+          // Wait for login form to load
+          await page.waitForSelector('input#username', { timeout: 10000 })
+          await page.waitForSelector('input#password', { timeout: 10000 })
           
-          await page.setUserAgent(
-            'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36'
-          );
-      
-          console.log('📍 Navigating to LinkedIn login page...')
+          console.log('📝 Filling login credentials...')
           
-          // Navigate with retry logic
-          let loginSuccess = false
-          let retryCount = 0
-          const maxRetries = 3
+          // Human-like form filling with random delays
+          await page.focus('input#username')
+          await page.waitForTimeout(Math.random() * 500 + 200)
           
-          while (!loginSuccess && retryCount < maxRetries) {
-            try {
-              await page.goto('https://www.linkedin.com/login', {
-                waitUntil: 'domcontentloaded',
-                timeout: 30000,
-              })
-              
-              // Wait for login form to load
-              await page.waitForSelector('input#username', { timeout: 10000 })
-              await page.waitForSelector('input#password', { timeout: 10000 })
-              
-              console.log('📝 Filling login credentials...')
-              
-              // Clear and type credentials with human-like delays
-              await page.click('input#username', { clickCount: 3 })
-              await page.type('input#username', email, { delay: 100 })
-              
-              await page.click('input#password', { clickCount: 3 })
-              await page.type('input#password', password, { delay: 100 })
-              
-              // Wait a bit before clicking submit
-              await page.waitForTimeout(1000)
-              
-              console.log('🔐 Submitting login form...')
-              
-              // Click submit and wait for navigation
-              const [response] = await Promise.all([
-                page.waitForNavigation({ 
-                  waitUntil: 'domcontentloaded', 
-                  timeout: 45000 
-                }),
-                page.click('button[aria-label="Sign in"]')
-              ])
-              
-              // Check if login was successful
-              const currentUrl = page.url()
-              console.log('📍 Current URL after login:', currentUrl)
-              
-              if (currentUrl.includes('/feed') || currentUrl.includes('/in/') || !currentUrl.includes('/login')) {
-                loginSuccess = true
-                console.log('✅ Login successful!')
-              } else {
-                throw new Error('Login may have failed - still on login page')
-              }
-              
-            } catch (error: any) {
-              retryCount++
-              console.log(`⚠️ Login attempt ${retryCount} failed:`, error.message)
-              
-              if (retryCount < maxRetries) {
-                console.log('🔄 Retrying login...')
-                await page.waitForTimeout(2000) // Wait before retry
-              }
-            }
+          // Type email character by character with random delays
+          for (const char of email) {
+            await page.keyboard.type(char)
+            await page.waitForTimeout(Math.random() * 100 + 50)
           }
           
-          if (!loginSuccess) {
-            throw new Error('Failed to login after multiple attempts')
+          await page.waitForTimeout(Math.random() * 500 + 300)
+          
+          await page.focus('input#password')
+          await page.waitForTimeout(Math.random() * 500 + 200)
+          
+          // Type password character by character
+          for (const char of password) {
+            await page.keyboard.type(char)
+            await page.waitForTimeout(Math.random() * 100 + 50)
           }
           
-          // Extract cookies
-          console.log('🍪 Extracting cookies...')
-          const client = await page.target().createCDPSession()
-          const allCookies = (await client.send('Network.getAllCookies')).cookies
-          const liAtCookie = allCookies.find((c: any) => c.name === 'li_at')?.value
+          // Random delay before submitting
+          await page.waitForTimeout(Math.random() * 1000 + 500)
           
-          if (!liAtCookie) {
-            throw new Error('Could not extract li_at cookie from LinkedIn')
-          }
+          console.log('🔐 Submitting login form...')
           
-          console.log('💾 Saving LinkedIn token for user...')
-          await saveLiAtForUser(userId, liAtCookie)
-          
-          console.log('✅ LinkedIn connection completed successfully!')
-          
-        } catch (error) {
-          console.error('❌ Error in processLinkedInConnection:', error)
-          // You could save the error to database here for user to see later
-          // await saveLinkedInConnectionError(userId, error.message)
-          
-        } finally {
-          if (browser) {
-            try {
-              await browser.close()
-              console.log('🔒 Browser closed')
-            } catch (closeError) {
-              console.error('Error closing browser:', closeError)
-            }
-          }
-        }
-      }
-      
-          // Helper function to implement exponential backoff for retries
-      async function delay(ms: number): Promise<void> {
-        return new Promise(resolve => setTimeout(resolve, ms))
-      }
-      
-      // Enhanced error handling wrapper
-      async function withRetry<T>(
-        operation: () => Promise<T>, 
-        maxRetries: number = 3,
-        baseDelay: number = 1000
-      ): Promise<T> {
-        let lastError: Error
-        
-        for (let i = 0; i <= maxRetries; i++) {
+          // Click submit and wait for navigation with better error handling
           try {
-            return await operation()
-          } catch (error) {
-            lastError = error as Error
+            const [response] = await Promise.all([
+              page.waitForNavigation({ 
+                waitUntil: 'domcontentloaded', 
+                timeout: 45000 
+              }),
+              page.click('button[aria-label="Sign in"]')
+            ])
             
-            if (i === maxRetries) {
-              throw lastError
+            // Log response status for debugging
+            if (response) {
+              console.log('📡 Navigation response status:', response.status())
             }
             
-            const delayMs = baseDelay * Math.pow(2, i) // Exponential backoff
-            console.log(`Retry ${i + 1}/${maxRetries} after ${delayMs}ms delay...`)
-            await delay(delayMs)
+          } catch (navError: any) {
+            console.log('⚠️ Navigation wait failed, but continuing:', navError?.message)
+            // Sometimes the navigation completes but waitForNavigation times out
+            // Let's continue and check the URL
+            await page.waitForTimeout(3000)
+          }
+          
+          // Check if login was successful or if we hit a challenge
+          const currentUrl = page.url()
+          console.log('📍 Current URL after login:', currentUrl)
+          
+          if (currentUrl.includes('/checkpoint/challenge')) {
+            console.log('🔐 LinkedIn security challenge detected. Attempting to handle...')
+            
+            // Handle security challenge
+            const challengeHandled = await handleLinkedInChallenge(page)
+            
+            if (!challengeHandled) {
+              throw new Error('Could not complete LinkedIn security challenge. Please try logging in manually first.')
+            }
+            
+            loginSuccess = true
+            console.log('✅ Security challenge completed!')
+            
+          } else if (currentUrl.includes('/feed') || currentUrl.includes('/in/') || !currentUrl.includes('/login')) {
+            loginSuccess = true
+            console.log('✅ Login successful!')
+          } else {
+            throw new Error('Login may have failed - still on login page')
+          }
+          
+        } catch (error: any) {
+          retryCount++
+          console.log(`⚠️ Login attempt ${retryCount} failed:`, error.message)
+          
+          if (retryCount < maxRetries) {
+            console.log('🔄 Retrying login...')
+            await page.waitForTimeout(2000) // Wait before retry
           }
         }
-        
-        throw lastError!
       }
+      
+      if (!loginSuccess) {
+        throw new Error('Failed to login after multiple attempts')
+      }
+      
+      // Extract cookies with better error handling
+      console.log('🍪 Extracting cookies...')
+      
+      // Wait a moment for all cookies to be set
+      await page.waitForTimeout(2000)
+      
+      const client = await page.target().createCDPSession()
+      const allCookies = (await client.send('Network.getAllCookies')).cookies
+      
+      console.log('🍪 Total cookies found:', allCookies.length)
+      console.log('🍪 Cookie names:', allCookies.map((c: any) => c.name).join(', '))
+      
+      const liAtCookie = allCookies.find((c: any) => c.name === 'li_at')?.value
+      
+      if (!liAtCookie) {
+        // Try alternative cookie extraction method
+        const cookiesFromPage = await page.cookies()
+        console.log('🍪 Page cookies:', cookiesFromPage.map((c: any) => c.name).join(', '))
+        
+        const altLiAtCookie = cookiesFromPage.find((c: any)=> c.name === 'li_at')?.value
+        
+        if (!altLiAtCookie) {
+          // If still no cookie, check if we're actually logged in
+          const isLoggedIn = await checkIfLoggedIn(page)
+          if (isLoggedIn) {
+            throw new Error('Login successful but li_at cookie not found. LinkedIn may have changed their cookie structure.')
+          } else {
+            throw new Error('Login failed - no authentication cookie found and user not logged in')
+          }
+        } else {
+          console.log('✅ Found li_at cookie using alternative method')
+          await saveLiAtForUser(userId, altLiAtCookie)
+        }
+      } else {
+        console.log('✅ Found li_at cookie using CDP method')
+        await saveLiAtForUser(userId, liAtCookie)
+      }
+      
+      console.log('✅ LinkedIn connection completed successfully!')
+      
+    } catch (error) {
+      console.error('❌ Error in processLinkedInConnection:', error)
+      // You could save the error to database here for user to see later
+      // await saveLinkedInConnectionError(userId, error.message)
+      
+    } finally {
+      if (browser) {
+        try {
+          await browser.close()
+          console.log('🔒 Browser closed')
+        } catch (closeError) {
+          console.error('Error closing browser:', closeError)
+        }
+      }
+    }
+  }
+  
+  // Helper function to handle LinkedIn security challenges
+  async function handleLinkedInChallenge(page: any): Promise<boolean> {
+    try {
+      console.log('🔍 Analyzing challenge page...')
+      
+      // Wait for challenge page to load
+      await page.waitForTimeout(3000)
+      
+      // Check for different types of challenges
+      const challengeText = await page.evaluate(() => {
+        return document.body.innerText.toLowerCase()
+      })
+      
+      console.log('📝 Challenge page content preview:', challengeText.substring(0, 200))
+      
+      // Handle email verification challenge
+      if (challengeText.includes('verify') && challengeText.includes('email')) {
+        console.log('📧 Email verification challenge detected')
+        
+        // Look for email input or confirmation button
+        const emailInput = await page.$('input[type="email"]')
+        if (emailInput) {
+          // This might require the user's email - for now, let's skip
+          console.log('⚠️ Email verification required - manual intervention needed')
+          return false
+        }
+        
+        // Look for "Send verification" or similar buttons
+        const sendButton = await page.$('button[data-litms-control-urn*="verify"]')
+        if (sendButton) {
+          console.log('📤 Clicking send verification button...')
+          await sendButton.click()
+          await page.waitForTimeout(2000)
+        }
+      }
+      
+      // Handle phone verification challenge
+      if (challengeText.includes('phone') && challengeText.includes('verify')) {
+        console.log('📱 Phone verification challenge detected')
+        console.log('⚠️ Phone verification required - manual intervention needed')
+        return false
+      }
+      
+      // Handle CAPTCHA challenge
+      if (challengeText.includes('captcha') || challengeText.includes('robot')) {
+        console.log('🤖 CAPTCHA challenge detected')
+        console.log('⚠️ CAPTCHA verification required - manual intervention needed')
+        return false
+      }
+      
+      // Handle "suspicious activity" challenge
+      if (challengeText.includes('suspicious') || challengeText.includes('unusual')) {
+        console.log('🚨 Suspicious activity challenge detected')
+        
+        // Sometimes there's a "Continue" button we can click
+        const continueButton = await page.$('button[data-litms-control-urn*="continue"]') || 
+                             await page.$('button:contains("Continue")') ||
+                             await page.$('input[value*="Continue"]')
+        
+        if (continueButton) {
+          console.log('➡️ Clicking continue button...')
+          await continueButton.click()
+          await page.waitForTimeout(3000)
+          
+          // Check if we moved past the challenge
+          const newUrl = page.url()
+          if (!newUrl.includes('/checkpoint/challenge')) {
+            console.log('✅ Successfully bypassed suspicious activity challenge')
+            return true
+          }
+        }
+      }
+      
+      // Wait a bit and check if challenge resolved itself
+      await page.waitForTimeout(5000)
+      const finalUrl = page.url()
+      
+      if (!finalUrl.includes('/checkpoint/challenge')) {
+        console.log('✅ Challenge appears to have been resolved')
+        return true
+      }
+      
+      console.log('❌ Challenge could not be automatically resolved')
+      return false
+      
+    } catch (error) {
+      console.error('Error handling LinkedIn challenge:', error)
+      return false
+    }
+  }
+  
+  // Helper function to check if user is actually logged in
+  async function checkIfLoggedIn(page: any): Promise<boolean> {
+    try {
+      // Try to navigate to a page that requires authentication
+      await page.goto('https://www.linkedin.com/feed', { 
+        waitUntil: 'domcontentloaded', 
+        timeout: 15000 
+      })
+      
+      await page.waitForTimeout(2000)
+      
+      const currentUrl = page.url()
+      
+      // If we're redirected back to login, we're not logged in
+      if (currentUrl.includes('/login') || currentUrl.includes('/checkpoint')) {
+        return false
+      }
+      
+      // Check for elements that indicate we're logged in
+      const loggedInIndicators = await page.evaluate(() => {
+        // Look for common logged-in elements
+        const feedElements = document.querySelectorAll('[data-module="feed"]')
+        const navElements = document.querySelectorAll('nav')
+        const profileElements = document.querySelectorAll('[data-control-name="nav.settings_profile"]')
+        
+        return feedElements.length > 0 || navElements.length > 0 || profileElements.length > 0
+      })
+      
+      return loggedInIndicators
+      
+    } catch (error) {
+      console.error('Error checking login status:', error)
+      return false
+    }
+  }
+  async function delay(ms: number): Promise<void> {
+    return new Promise(resolve => setTimeout(resolve, ms))
+  }
+  
+  // Enhanced error handling wrapper
+  async function withRetry<T>(
+    operation: () => Promise<T>, 
+    maxRetries: number = 3,
+    baseDelay: number = 1000
+  ): Promise<T> {
+    let lastError: Error
+    
+    for (let i = 0; i <= maxRetries; i++) {
+      try {
+        return await operation()
+      } catch (error) {
+        lastError = error as Error
+        
+        if (i === maxRetries) {
+          throw lastError
+        }
+        
+        const delayMs = baseDelay * Math.pow(2, i) // Exponential backoff
+        console.log(`Retry ${i + 1}/${maxRetries} after ${delayMs}ms delay...`)
+        await delay(delayMs)
+      }
+    }
+    
+    throw lastError!
+  }
