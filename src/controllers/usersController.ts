@@ -591,13 +591,14 @@ await page.evaluateOnNewDocument(() => {
       await page.waitForTimeout(2000)
       
       const client = await page.target().createCDPSession()
+      await client.send('Network.enable');           // ← add this
       const allCookies = (await client.send('Network.getAllCookies')).cookies
       
       console.log('🍪 Total cookies found:', allCookies.length)
       console.log('🍪 Cookie names:', allCookies.map((c: any) => c.name).join(', '))
       
       const liAtCookie = allCookies.find((c: any) => c.name === 'li_at')?.value
-      
+        console.log(`🍪 li_at cookie: ${liAtCookie}`);
       if (!liAtCookie) {
         // Try alternative cookie extraction method
         const cookiesFromPage = await page.cookies()
