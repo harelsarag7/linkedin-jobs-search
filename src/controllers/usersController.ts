@@ -37,7 +37,7 @@ export const usersController = {
           }
     
           const {
-            fullName, phone, email, location, bio,
+            language, fullName, phone, email, location, bio,
             linkedinUrl, githubUrl, personalWebsite, desiredJobTitle,
             employmentType, minSalary, maxSalary, searchRadius,
             openToRemote, skills, blockedCompanies, keywords, experienceLevels
@@ -57,6 +57,7 @@ export const usersController = {
 
           const updates: Partial<typeof user> = {
             ...(fullName && { fullName }),
+            ...(language && { language }),
             ...(phone && { phone }),
             ...(email && { email }),
             ...(location && { location }),

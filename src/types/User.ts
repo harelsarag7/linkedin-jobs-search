@@ -1,6 +1,7 @@
 
 export interface UserType {
     fullName: string
+    language?: string,
     phone?: string
     email: string
     location?: string

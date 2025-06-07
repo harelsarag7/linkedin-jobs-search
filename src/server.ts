@@ -7,7 +7,7 @@ import jobsRoutes from './routes/jobs';
 import usersRoutes from './routes/users';
 import authRoutes from './routes/auth';
 import cookieParser from 'cookie-parser'
-import { startLinkedInJobCron } from './services/cronjob';
+import { linkedinJobFetch, startLinkedInJobCron } from './services/cronjob';
 
 require('dotenv').config();
 
@@ -48,6 +48,7 @@ app.listen(PORT, async () => {
     }
     try {
         startLinkedInJobCron();
+        await linkedinJobFetch();
     } catch (err) {
         console.error('Error starting LinkedIn job cron:', err);
     }

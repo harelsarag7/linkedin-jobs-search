@@ -26,6 +26,8 @@ const userSchema = new mongoose.Schema({
   li_at: { type: String, required: false },  // LinkedIn cookie
 
   createdAt: { type: Date, default: Date.now },
+
+  language: { type: String, required: false, default: 'en' }, // Default to English
 })
 
 export const 

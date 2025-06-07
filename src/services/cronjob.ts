@@ -41,3 +41,35 @@ export function startLinkedInJobCron() {
     timezone: TEL_AVIV_TZ
   })
 }
+
+
+export async function linkedinJobFetch() {
+  console.log(`🔁 Running LinkedIn Job Cron at ${new Date().toISOString()}`)
+
+  const users = await getAllUsers()
+
+  for (const user of users) {
+    const { email, li_at, keywords, location, experienceLevels, resumeUrl } = user
+
+    if (!li_at) continue
+    if (!Array.isArray(keywords) || keywords.length === 0) continue
+
+    const userLocation = location || 'Tel Aviv'
+
+    for (const keyword of keywords) {
+      try {
+        const jobs = await fetchLinkedInJobs(li_at, keyword, userLocation, experienceLevels, resumeUrl)
+        await saveJobsForUser(email, jobs)
+        console.log(`✅ Saved jobs for ${email} | keyword: ${keyword}`)
+      } catch (err: unknown) {
+        if  (err instanceof Error) {
+          console.error(`❌ Error fetching jobs for ${email} (${keyword}):`, err.message)
+        } else {
+          console.error(`❌ Error fetching jobs for ${email} (${keyword}):`, )
+          console.error(err)
+            
+        }
+      }
+    }
+  }
+}

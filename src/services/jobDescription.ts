@@ -4,10 +4,34 @@ const isDev = process.env.NODE_ENV === "development";
 export const getJobDescription = async (url: string): Promise<string> => {
     const browser = await puppeteer.launch({
       headless: isDev ? false: true,
-      slowMo: 200,
-      defaultViewport: null,
-      devtools: true,
-      args: ['--start-maximized'],
+      devtools: isDev,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-dev-shm-usage',
+        '--disable-accelerated-2d-canvas',
+        '--no-first-run',
+        '--no-zygote',
+        '--single-process', // Important for Heroku
+        '--disable-gpu',
+        '--disable-background-timer-throttling',
+        '--disable-backgrounding-occluded-windows',
+        '--disable-renderer-backgrounding',
+        '--disable-features=TranslateUI',
+        '--disable-ipc-flooding-protection',
+        '--memory-pressure-off',
+        '--max-old-space-size=4096',
+        '--disable-blink-features=AutomationControlled', // Hide automation flags
+        '--disable-features=VizDisplayCompositor',
+        '--disable-extensions',
+        '--disable-plugins',
+        '--disable-web-security',
+        '--disable-features=site-per-process',
+        '--window-size=1366,768'
+      ],
+      executablePath: process.env.PUPPETEER_EXECUTABLE_PATH,
+      defaultViewport: null, // Use full window size
+      timeout: 0, // No timeout for launch
     });
     const page = await browser.newPage();
   
