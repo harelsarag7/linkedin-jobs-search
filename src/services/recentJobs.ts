@@ -63,6 +63,7 @@ export const fetchLinkedInJobs = async (cookie: string, keyword: string, locatio
     for (const job of jobs) {
         job.description = await getJobDescription(job.url);
         if(job.description && resumeText) {
+            console.log(`Detecting match score for job: ${job.title}`);
             job.matchScore = await detectMatchScore(job.description, resumeText)
         }
     }
