@@ -165,7 +165,7 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
   export async function getAllUsers(): Promise<any[]> {
     try {
       // Include li_at, keywords, and location in the projection
-      const users = await User.find({}, 'email li_at keywords location').exec();
+      const users = await User.find({}, 'email li_at keywords location resumeUrl').exec();
       return users.map(user => ({
         id: user._id.toString(),
         email: user.email,
