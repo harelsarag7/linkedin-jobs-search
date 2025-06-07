@@ -11,6 +11,7 @@ const jobSchema = new mongoose.Schema({
   url: { type: String, required: true },
   companyLogo: { type: String, required: false },
   agoTime: { type: String, required: false },
+  matchScore: { type: Number, required: false, default: 0 },
   salary: { type: String, required: false, default: 'Not specified' },
   description: String,
   savedAt: { type: Date, default: Date.now },

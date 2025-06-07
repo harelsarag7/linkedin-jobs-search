@@ -2,10 +2,11 @@ import axios from "axios";
 import { getJobDescription } from "./jobDescription";
 import * as cheerio from "cheerio";
 import { experienceRange } from "../utils/utils";
+import { detectMatchScore, extractTextFromResumeUrl } from "./openai";
 
 type ExperienceLevel = keyof typeof experienceRange;
 
-export const fetchLinkedInJobs = async (cookie: string, keyword: string, location: string, experienceLevels: ExperienceLevel[]): Promise<any[]> => {
+export const fetchLinkedInJobs = async (cookie: string, keyword: string, location: string, experienceLevels: ExperienceLevel[], resumeUrl: string | undefined): Promise<any[]> => {
   let searchUrl = `https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords=${encodeURIComponent(keyword)}&location=${encodeURIComponent(location)}&f_TPR=r7200`;
 
   if (experienceLevels && experienceLevels.length) {
@@ -54,12 +55,19 @@ export const fetchLinkedInJobs = async (cookie: string, keyword: string, locatio
 //     // }
 //   });
 
-  // // description fetching is commented out to avoid long execution time
-//   for (const job of jobs) {
-//     job.description = await getJobDescription(job.url);
-//   }
+  // description fetching is commented out to avoid long execution time
+    let resumeText = "";
+    if(resumeUrl) {
+        resumeText = await extractTextFromResumeUrl(resumeUrl);
+        }
+    for (const job of jobs) {
+        job.description = await getJobDescription(job.url);
+        if(job.description && resumeText) {
+            job.matchScore = await detectMatchScore(job.description, resumeText)
+        }
+    }
 
-  return jobs;
+    return jobs;
 };
 
 
@@ -102,6 +110,8 @@ function parseJobList(jobData: any) {
               salary: salary || "Not specified",
               companyLogo,
               agoTime,
+              description: "", // Placeholder for description, will be filled later
+              matchScore: 0,
             };
           } catch (err: unknown) {
             console.warn(`Error parsing job at index ${index}:`, err);

@@ -80,7 +80,8 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
         email: job.email,
         companyLogo: job.companyLogo,
         agoTime: job.agoTime,
-        salary: job.salary
+        salary: job.salary,
+        matchScore: job.matchScore || 0
       }))
     } catch (err) {
       console.error('❌ Error fetching ready-to-apply jobs:', err)
@@ -127,7 +128,8 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
         email: job.email,
         companyLogo: job.companyLogo,
         agoTime: job.agoTime,
-        salary: job.salary
+        salary: job.salary,
+        matchScore: job.matchScore || 0
       }))
     } catch (err) {
       console.error('❌ Error fetching applied jobs:', err)

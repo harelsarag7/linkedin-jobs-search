@@ -20,4 +20,5 @@ notes?: Array<{
 companyLogo?: string;
 agoTime?: string;
 salary?: string;
+matchScore?: number;
 }

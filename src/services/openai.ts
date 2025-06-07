@@ -81,12 +81,15 @@ export async function detectMatchScore(
 ): Promise<number> {
   const prompt = `
   You are an AI assistant that evaluates how well a resume matches a job description. Your task is to analyze the provided resume text and job description, and return a match score from 0 to 100, where 0 means no match and 100 means perfect match.
+
+  rules:
+  - You MUST return only a number between 0 and 100.
   Resume text:  
   ${resumeText}
   Job description:
   ${jobDescription}
     `.trim();
-    
+
   const response = await client.chat.completions.create({
     model: "gpt-4o-mini",
     messages: [{ role: "user", content: prompt }],

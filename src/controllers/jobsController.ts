@@ -5,7 +5,6 @@ import { fetchLinkedInJobs } from '../services/recentJobs';
 import { RequestWithUser } from '../types/request';
 import { Job } from '../models/Job';
 import { addJobNoteService, getJobNotes } from '../services/JobNote';
-import { getLiAtCookie } from '../utils/utils';
 
 export const jobsController = {
     async recentJobs(req: RequestWithUser, res: Response) {
@@ -13,6 +12,7 @@ export const jobsController = {
         const keyword = req.query.keyword as string || '';
         const location = req.query.location as string || '';
         const cookie = req.user.li_at
+        const resumeUrl = req.user.resumeUrl
         const experienceLevels = req.user.experienceLevels || null;
         
         const email = req.user.email
@@ -23,7 +23,7 @@ export const jobsController = {
         if(!cookie) {
           throw new Error('Missing li_at cookie in environment variables');
         }
-        const jobs = await fetchLinkedInJobs(cookie, keyword, location, experienceLevels);
+        const jobs = await fetchLinkedInJobs(cookie, keyword, location, experienceLevels, resumeUrl);
         console.log(jobs)
         await saveJobsForUser(email, jobs);
     
