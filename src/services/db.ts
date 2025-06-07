@@ -172,6 +172,7 @@ export const saveJobsForUser = async (email: string, jobs: any[]) => {
         li_at: user.li_at,
         keywords: user.keywords || [],
         location: user.location || '',
+        resumeUrl: user.resumeUrl || '',
       }));
     } catch (err) {
       console.error('❌ Error fetching all users:', err);
